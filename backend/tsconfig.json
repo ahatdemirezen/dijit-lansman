@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                          // Çıktı JavaScript dosyalarının hedef sürümü
+    "module": "commonjs",                        // Modül sistemi olarak CommonJS kullanıyoruz (Node.js uyumlu)
+    "outDir": "./dist",                          // Derlenmiş dosyaların çıkış klasörü
+    "rootDir": "./src",                          // Kaynak dosyaların bulunduğu klasör
+    "strict": true,                              // Tüm katı tip denetimleri etkin
+    "esModuleInterop": true,                     // CommonJS ve ES Modüller arasında uyumluluk sağlar
+    "skipLibCheck": true,                        // .d.ts dosyalarının kontrolünü atla
+    "forceConsistentCasingInFileNames": true,    // Dosya isimlerinde tutarlı büyük/küçük harf kontrolü
+    "resolveJsonModule": true,                   // .json dosyalarının import edilmesine izin ver
+    "isolatedModules": true,                     // Her dosyanın izole şekilde derlenmesini sağlar
+    "noEmitOnError": true,                       // Hata olduğunda dosya oluşturmayı durdurur
+    "sourceMap": true                            // JavaScript dosyaları için kaynak haritaları oluşturur
+  },
+  "include": ["src/**/*"],                       // Kaynak dosyalar
+  "exclude": ["node_modules", "dist"]            // Dışlanacak dosyalar ve klasörler
+}
