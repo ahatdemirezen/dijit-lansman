@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useLaunchStore from "../zustands/useLaunchStore";
 import NewLaunchFormModal from "./LaunchFormModal";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRight, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import NavBar from "../components/NavBar";
 
-const Launches = () => {
+const homePage = () => {
   const { launches, getLaunchData, fetchLaunchById, clearLaunchData } =
     useLaunchStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,9 +25,10 @@ const Launches = () => {
     getLaunchData();
   }, [getLaunchData]);
 
-  // Veriler her güncellendiğinde yeni eklenen lansman başa gelecek şekilde ayarlayın
+  // Sadece anasayfada gösterilecek lansmanları filtrele
   useEffect(() => {
-    setSortedLaunches([...launches].reverse());
+    const filteredLaunches = launches.filter((launch) => launch.showOnHomepage);
+    setSortedLaunches(filteredLaunches.reverse()); // ShowOnHomepage true olanları ters sırayla ayarlayın
   }, [launches]);
 
   // Lansman adına göre arama fonksiyonu
@@ -37,37 +38,38 @@ const Launches = () => {
     );
   };
 
-  // Duruma göre filtreleme fonksiyonu
-  const filterLaunches = (launches: any[]) => {
-    const filteredByStatus =
+  // showOnHomepage ve isActive değerlerine göre filtreleme fonksiyonu
+  const filterShowOnHomePage = (launches: any[]) => {
+    const filteredByShowOnHomepage =
       filterStatus === "active"
-        ? launches.filter((launch) => launch.isActive)
+        ? launches.filter((launch) => launch.showOnHomepage && launch.isActive)
         : filterStatus === "inactive"
-        ? launches.filter((launch) => !launch.isActive)
-        : launches;
-    return searchLaunches(filteredByStatus); // Hem filtreleme hem arama fonksiyonunu birleştiriyoruz
+        ? launches.filter((launch) => launch.showOnHomepage && !launch.isActive)
+        : launches.filter((launch) => launch.showOnHomepage); // Sadece showOnHomepage true olanları filtrele
+
+    return searchLaunches(filteredByShowOnHomepage); // Hem filtreleme hem arama fonksiyonunu birleştiriyoruz
   };
 
   const handleCreateClick = () => {
-    setSelectedLaunchId(null);
-    clearLaunchData();
-    setIsModalOpen(true);
+    setSelectedLaunchId(null); // Yeni ekle butonuna tıklanıldığında seçili launchId sıfırlanır
+    clearLaunchData(); // Mevcut verileri sıfırla
+    setIsModalOpen(true); // Modalı aç
   };
 
   const handleEditClick = (launchId: string) => {
-    setSelectedLaunchId(launchId);
-    setIsModalOpen(true);
+    setSelectedLaunchId(launchId); // Düzenle butonuna tıklanıldığında ilgili launchId seçilir
+    setIsModalOpen(true); // Modalı aç
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
+    setIsModalOpen(false); // Modalı kapat
   };
 
   useEffect(() => {
     if (selectedLaunchId) {
-      fetchLaunchById(selectedLaunchId);
+      fetchLaunchById(selectedLaunchId); // Eğer bir lansman ID'si seçildiyse, ilgili veriyi getir
     } else {
-      clearLaunchData();
+      clearLaunchData(); // Seçili bir lansman yoksa formu sıfırla
     }
   }, [selectedLaunchId, fetchLaunchById, clearLaunchData]);
 
@@ -78,6 +80,7 @@ const Launches = () => {
   // Yayına Giriş Tarihi'ne göre sıralama işlevi
   const handleSortByLaunchDate = () => {
     if (sortDirection === "none" || sortDirection === "original") {
+      // Tarihlere göre artan sırada sıralama (en erken tarih en üstte)
       const sorted = [...launches].sort(
         (a, b) =>
           new Date(a.launchDate).getTime() - new Date(b.launchDate).getTime()
@@ -85,19 +88,15 @@ const Launches = () => {
       setSortedLaunches(sorted);
       setSortDirection("ascending");
     } else {
-      setSortedLaunches([...launches].reverse());
+      // Orijinal sıralamaya geri dön (ilk eklenen en üstte)
+      setSortedLaunches([...launches].reverse()); // Reverse burada da kullanılır
       setSortDirection("original");
     }
   };
 
-  // Filtreleme seçeneğini değiştir
-  const handleFilterChange = (status: "all" | "active" | "inactive") => {
-    setFilterStatus(status);
-  };
-
   return (
     <div className="flex h-full">
-      <NavBar />
+      <NavBar /> {/* NavBar bileşenini sol tarafa yerleştirin */}
       <div className="flex-1 flex flex-col bg-gray-100">
         <div className="bg-gray-800 text-white text-xs p-6 mx-8 my-5 rounded-lg">
           <p>DAMISE ADMIN PANEL</p>
@@ -116,42 +115,13 @@ const Launches = () => {
             >
               Lansmanlar
             </h1>
-            <div className="flex space-x-4 items-center">
-              {/* Arama çubuğu */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Lansman Adı ile Ara"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border border-[#D6D6D6] rounded-md px-4 py-2 pl-10 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out"
-                  style={{
-                    height: "40px", // Make the input height same as the button
-                  }}
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 absolute left-3 top-2.5 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM21 21l-4.35-4.35"
-                  />
-                </svg>
-              </div>
-
-              {/* Yeni Ekle Butonu */}
+            <div className="flex space-x-4">
               <button
                 className="bg-white text-[#091E42] border border-[#D6D6D6] shadow-md flex items-center justify-center"
                 onClick={handleCreateClick}
                 style={{
                   width: "92px",
-                  height: "40px", // Set the button height explicitly
+                  height: "40px",
                   borderRadius: "8px",
                   padding: "10px 16px",
                   boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
@@ -172,41 +142,10 @@ const Launches = () => {
               </button>
             </div>
           </div>
-
           <h2 className="text-xs text-gray-500 my-2">
             Bu kısımda oluşturmuş olduğunuz aktif/pasif lansmanları
             görüntüleyebilirsiniz.
           </h2>
-
-          {/* Filtreleme butonları */}
-          <div className="flex space-x-4 mt-6">
-            {" "}
-            {/* mt-6 ile sadece üst boşluk eklendi */}
-            <button
-              onClick={() => handleFilterChange("all")}
-              className={`${
-                filterStatus === "all" ? "text-black" : "text-gray-400"
-              }`}
-            >
-              Tüm Lansmanlar
-            </button>
-            <button
-              onClick={() => handleFilterChange("active")}
-              className={`${
-                filterStatus === "active" ? "text-black" : "text-gray-400"
-              }`}
-            >
-              Aktif Lansmanlar
-            </button>
-            <button
-              onClick={() => handleFilterChange("inactive")}
-              className={`${
-                filterStatus === "inactive" ? "text-black" : "text-gray-400"
-              }`}
-            >
-              Pasif Lansmanlar
-            </button>
-          </div>
           <hr className="my-5" />
 
           {/* Tablonun oluşturulması */}
@@ -245,7 +184,12 @@ const Launches = () => {
                   }}
                   onClick={handleSortByLaunchDate}
                 >
-                  <div style={{ display: "flex", alignItems: "center" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
                     <span style={{ marginRight: "7px" }}>
                       Yayına Giriş Tarihi
                     </span>
@@ -273,13 +217,15 @@ const Launches = () => {
                     </svg>
                   </div>
                 </th>
+
+                {/* Yayın Bitiş Tarihi başlığı stili güncellendi */}
                 <th
                   className="text-left px-4 py-2"
                   style={{
                     fontSize: "12px",
                     fontWeight: "400",
                     lineHeight: "16px",
-                    color: "#A3AED0",
+                    color: "#A3AED0", // Diğer başlıklarla aynı renk ve boyut
                     wordWrap: "break-word",
                     wordBreak: "break-word",
                     maxWidth: "150px",
@@ -287,6 +233,7 @@ const Launches = () => {
                 >
                   <span>Yayın Bitiş Tarihi</span>
                 </th>
+
                 {["Düzenle", "Tasarla"].map((header, index) => (
                   <th
                     key={index}
@@ -307,7 +254,7 @@ const Launches = () => {
               </tr>
             </thead>
             <tbody>
-              {filterLaunches(sortedLaunches).map((launch) => (
+              {sortedLaunches.map((launch) => (
                 <tr key={launch._id} className="hover:bg-gray-100">
                   <td
                     className="px-4 py-2"
@@ -378,4 +325,4 @@ const Launches = () => {
   );
 };
 
-export default Launches;
+export default homePage;

@@ -21,6 +21,8 @@ import TwinFlipCardSection from "../sections/twinFlipCard-section";
 import TwinTopTitleHeroCardSection from "../sections/twinTopTitleHeroCard-section";
 import LargePopupCardSection from "../sections/largePopupCard-section";
 import ReelsCardSliderSection from "../sections/reelsCardSlider-section";
+import BottomTextCardSection from "../sections/BottomTextCardSection";
+import SearchSection from "../sections/search-card-section";
 
 interface FullScreenCardItem {
   media: string;
@@ -51,6 +53,7 @@ interface ReelsCardItem {
   subTitle: string;
 }
 interface Content {
+  searchQuery?: string; // searchQuery alanını ekledik
   title?: string;
   subTitle?: string;
   buttonText?: string;
@@ -144,6 +147,14 @@ const PreviewPage: React.FC = () => {
               />
             );
           }
+          if (component.type === "Search Form") {
+            return (
+              <SearchSection
+                key={component._id}
+                searchQuery={component.content.searchQuery || ""}
+              />
+            );
+          }
 
           if (component.type === "Large Card") {
             return (
@@ -163,7 +174,15 @@ const PreviewPage: React.FC = () => {
               />
             );
           }
-
+          if (component.type === "Bottom Text Card") {
+            return (
+              <BottomTextCardSection
+                key={component._id}
+                text={component.content.text || ""}
+                media={component.content.media || ""}
+              />
+            );
+          }
           if (component.type === "Header") {
             return (
               <div key={component._id}>

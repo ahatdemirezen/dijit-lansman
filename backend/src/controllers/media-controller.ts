@@ -37,22 +37,27 @@ export const listAllMedia: RequestHandler = async (req, res, next) => {
 // Medya yükleme
 // Backend'deki createMedia fonksiyonu
 export const createMedia: RequestHandler = async (req, res, next) => {
-  const { mediaName } = req.body; // mediaUploadOrLink yerine sadece mediaName alınıyor olabilir.
-  const mediaUploadOrLink = req.file; // Eğer dosya yüklemesi yapıyorsanız, dosya multer gibi bir middleware ile işleniyor olmalı
+  const { mediaName, companyName } = req.body; // Firma adı ve medya adı alınıyor
+  const mediaUploadOrLink = req.file; // Yüklenen dosya
 
-  if (!mediaUploadOrLink || !mediaName) {
-    return res.status(400).json({ message: "Gerekli alanlar eksik" });
+  if (!mediaUploadOrLink || !mediaName || !companyName) {
+    return res
+      .status(400)
+      .json({ message: "Medya adı ve firma adı zorunludur." });
   }
 
-  const key = `${mediaName}`; // Sabit key değeri "ahat"
-  const contentType = mime.lookup(mediaName) || "application/octet-stream"; // MIME türünü otomatik olarak belirle
+  const key = `${mediaName}`;
+  const contentType = mime.lookup(mediaName) || "application/octet-stream";
 
   try {
     const uploadParams = {
       Bucket: process.env.BUCKET_NAME,
       Key: key,
-      Body: mediaUploadOrLink.buffer, // Multer kullanılıyorsa bu şekilde erişebilirsiniz
-      ContentType: contentType, // Dinamik olarak belirlenen ContentType
+      Body: mediaUploadOrLink.buffer, // Dosya içeriği burada belirleniyor
+      ContentType: contentType, // İçerik türü belirleniyor
+      Metadata: {
+        companyName, // Firma adı metadata olarak ekleniyor
+      },
     };
 
     await s3.send(new PutObjectCommand(uploadParams));
