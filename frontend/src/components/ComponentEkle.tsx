@@ -11,12 +11,15 @@ import TopTextCardForm from "./TopTextCardForm";
 import InfoCardSliderForm from "./InfoCardSliderForm";
 import CTACardForm from "./CTACardForm";
 import TitleForm from "./TitleForm";
+import SpacerForm from "./spaceform";
+import BannerForm from "./BannerForm";
 import TwinCardForm from "./TwinCardForm";
 import TwinFlipCardForm from "./TwinFlipCardForm";
 import AccordionRightCardForm from "./AccordionRightCardForm";
 import LargeTopTitleHeroCardForm from "./LargeTopTitleHeroCardForm";
 import FullScreenCardSliderForm from "./FullScreenCardSliderForm";
 import MiniCardSliderForm from "./MiniCardSlider";
+import ReelsBottomCardForm from "./ReelsBottomCardForm";
 import HeaderForm from "./HeaderForm";
 import TwinTopTitleHeroCardForm from "./TwinTopTitleHeroCardForm"; // Yeni bileşen eklendi
 import { useParams } from "react-router-dom";
@@ -135,6 +138,25 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
   const [reelsCardSliderItems, setReelsCardSliderItems] = useState<
     { id: number; media: string; title: string; subTitle: string }[]
   >([{ id: 1, media: "", title: "", subTitle: "" }]);
+  const [reelsBottomCardItems, setReelsBottomCardItems] = useState<
+    {
+      id: number;
+      media: string;
+      title: string;
+      subTitle: string;
+      buttonText: string;
+      buttonUrl: string;
+    }[]
+  >([
+    {
+      id: 1,
+      media: "",
+      title: "",
+      subTitle: "",
+      buttonText: "",
+      buttonUrl: "",
+    },
+  ]);
 
   const [fullScreenCardItems, setFullScreenCardItems] = useState<
     {
@@ -287,25 +309,98 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
       prevItems.filter((_, idx) => idx !== index)
     );
   };
-
-  const handleAccordianTitleChange = (
-    index: number,
-    e: ChangeEvent<HTMLInputElement>
+  const handleReelsBottomCardMediaChange = (
+    id: number,
+    e: ChangeEvent<HTMLSelectElement>
   ) => {
-    setAccordianItems((prevItems) =>
-      prevItems.map((item, idx) =>
-        idx === index ? { ...item, title: e.target.value } : item
+    setReelsBottomCardItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, media: e.target.value } : item
       )
     );
   };
 
-  const handleAccordianSubTitleChange = (
-    index: number,
+  const handleReelsBottomCardTitleChange = (
+    id: number,
     e: ChangeEvent<HTMLInputElement>
   ) => {
+    setReelsBottomCardItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, title: e.target.value } : item
+      )
+    );
+  };
+
+  const handleReelsBottomCardSubTitleChange = (
+    id: number,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    setReelsBottomCardItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, subTitle: e.target.value } : item
+      )
+    );
+  };
+
+  const handleReelsBottomCardButtonTextChange = (
+    id: number,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    setReelsBottomCardItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, buttonText: e.target.value } : item
+      )
+    );
+  };
+
+  const handleReelsBottomCardButtonUrlChange = (
+    id: number,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    setReelsBottomCardItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, buttonUrl: e.target.value } : item
+      )
+    );
+  };
+
+  const handleAddReelsBottomCard = () => {
+    const newCard = {
+      id: reelsBottomCardItems.length + 1,
+      media: "",
+      title: "",
+      subTitle: "",
+      buttonText: "",
+      buttonUrl: "",
+    };
+    setReelsBottomCardItems([...reelsBottomCardItems, newCard]);
+  };
+
+  const handleRemoveReelsBottomCard = (id: number) => {
+    setReelsBottomCardItems(
+      reelsBottomCardItems.filter((item) => item.id !== id)
+    );
+  };
+
+  const handleAccordianTitleChange = (
+    index: number,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { value } = e.target;
     setAccordianItems((prevItems) =>
       prevItems.map((item, idx) =>
-        idx === index ? { ...item, subTitle: e.target.value } : item
+        idx === index ? { ...item, title: value } : item
+      )
+    );
+  };
+  const handleAccordianSubTitleChange = (
+    index: number,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { value } = e.target;
+    setAccordianItems((prevItems) =>
+      prevItems.map((item, idx) =>
+        idx === index ? { ...item, subTitle: value } : item
       )
     );
   };
@@ -557,14 +652,24 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
           logoMedia,
         };
         break;
+      case "Banner Form":
+        content = {
+          buttonText,
+          buttonUrl,
+          media, // media değeri eklendi
+        };
+        break;
+
       case "Search Form":
         // searchQuery burada content'e eklenir.
         content = {
           searchQuery,
         };
         break;
-
-        break;
+      case "Reels Bottom Card":
+        content = {
+          reelsBottomCardItems,
+        };
         break;
       case "Large Card":
         content = {
@@ -674,6 +779,11 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
           fullScreenCardItems,
         };
         break;
+      case "Space":
+        content = {
+          spacer: true,
+        };
+        break;
       case "Mini Card Slider":
         content = {
           miniCardItems,
@@ -714,7 +824,7 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
         fetchDeployDesign(launchId); // Verileri yeniden yükle
         onClose(); // Modal'ı kapatmak için
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.error("Veri kaydedilirken hata oluştu:", err);
       });
   };
@@ -729,6 +839,19 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
             onTitleChange={handleTitleChange}
             onLogoMediaChange={handleLogoMediaChange}
             onSubmit={handleFormSubmit} // Burada onSubmit fonksiyonunu ekliyoruz
+          />
+        );
+      case "Reels Bottom Card":
+        return (
+          <ReelsBottomCardForm
+            items={reelsBottomCardItems}
+            onMediaChange={handleReelsBottomCardMediaChange}
+            onTitleChange={handleReelsBottomCardTitleChange}
+            onSubTitleChange={handleReelsBottomCardSubTitleChange}
+            onButtonTextChange={handleReelsBottomCardButtonTextChange}
+            onButtonUrlChange={handleReelsBottomCardButtonUrlChange}
+            onAddItem={handleAddReelsBottomCard}
+            onRemoveItem={handleRemoveReelsBottomCard}
           />
         );
       case "Search Form":
@@ -749,6 +872,19 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
             onUrlChange={handleUrlChange}
           />
         );
+      case "Banner Form":
+        return (
+          <BannerForm
+            buttonText={buttonText}
+            buttonUrl={buttonUrl}
+            media={media} // Media alanı buraya ekleniyor
+            onButtonTextChange={handleButtonTextChange}
+            onButtonUrlChange={handleButtonUrlChange}
+            onMediaChange={(e) => setMedia(e.target.value)} // Media için handle fonksiyonu eklendi
+            onFormSubmit={handleFormSubmit}
+          />
+        );
+
       case "Large Popup Card":
         return (
           <LargePopupCardForm media={media} onMediaChange={handleMediaChange} />
@@ -950,6 +1086,8 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
           />
         );
 
+      case "Space":
+        return <SpacerForm />; // SpacerForm bileşeni ekleniyor
       default:
         return null;
     }
@@ -965,7 +1103,7 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
       className={`bg-white rounded-lg shadow-lg w-full ${
         selectedComponent === "Twin Top Title Hero Card"
           ? "max-w-5xl"
-          : "max-w-lg"
+          : "max-w-6xl"
       } relative modal-content`} // Seçili bileşene göre genişlik ayarlandı
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
       style={{
@@ -1008,15 +1146,18 @@ const ComponentEkleModal: React.FC<ComponentEkleModalProps> = ({
               <option value="Large Card">Large Card</option>
               <option value="Large Popup Card">Large Popup Card</option>
               <option value="Search Form">Search Form</option>
+              <option value="Banner Form">Banner Form</option>
               <option value="Large Flip Card">Large Flip Card</option>
               <option value="Large Scalable Card">Large Scalable Card</option>
               <option value="Full Text">Full Text</option>
+              <option value="Reels Bottom Card">Reels Bottom Card</option>
               <option value="Reels Card Slider">Reels Card Slider</option>
               <option value="Right Text Card">Right Text Card</option>
               <option value="Bottom Text Card">Bottom Text Card</option>
               <option value="Left Text Card">Left Text Card</option>
               <option value="Top Text Card">Top Text Card</option>
               <option value="Info Card Slider">Info Card Slider</option>
+              <option value="Space">Space</option>
               <option value="CTA Card">CTA Card</option>
               <option value="Title">Title</option>
               <option value="Twin Card">Twin Card</option>

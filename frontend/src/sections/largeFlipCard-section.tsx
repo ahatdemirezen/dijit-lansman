@@ -16,7 +16,7 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
   const backMediaUrl = `${import.meta.env.VITE_AWS_S3_BUCKET_URL}/${backMedia}`;
 
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isButtonHovered, setIsButtonHovered] = useState(false); // Sadece buton için hover durumu
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   const { ref: cardRef, inView } = useInView({
     triggerOnce: false,
@@ -44,8 +44,8 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
           src={mediaUrl}
           controls
           style={{
-            width: "1040px",
-            height: "624px",
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
             borderRadius: "8px",
           }}
@@ -60,8 +60,8 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
         src={mediaUrl}
         alt="Media"
         style={{
-          width: "1040px",
-          height: "624px",
+          width: "100%",
+          height: "100%",
           objectFit: "cover",
           borderRadius: "8px",
         }}
@@ -76,6 +76,7 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
     transformStyle: "preserve-3d",
     transition: "transform 0.8s ease-out",
     transform: isFlipped ? "rotateX(180deg)" : "rotateX(0deg)",
+    zIndex: 0, // Kartın diğer elementlerin üstüne çıkmasını engellemek için 0
   };
 
   const frontStyle: React.CSSProperties = {
@@ -91,30 +92,27 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
     boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
   };
 
-  // Şeffaf ve hover efektli buton stili
   const buttonStyle: React.CSSProperties = {
     position: "absolute",
     bottom: "20px",
     right: "20px",
     width: "40px",
     height: "40px",
-    backgroundColor: "transparent", // Şeffaf arka plan
-    border: "2px solid white", // Dış kenarlar beyaz
-    borderRadius: "50%",
+    backgroundColor: "transparent", // Butonun arka planı tamamen şeffaf
+    border: "2px solid white", // Beyaz sınır çizgisi
+    borderRadius: "50%", // Butonu dairesel yapmak için
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     cursor: "pointer",
     fontSize: "24px",
-    transition: "all 0.3s ease", // Geçiş efekti
+    transition: "border 0.3s ease", // Sadece kenar rengini değiştiriyoruz
+    zIndex: 2, // Butonun her zaman kartın önünde kalmasını sağlıyoruz
   };
 
-  // Buton hover durumu için stil (Koyu gri renk eklendi)
   const buttonHoverStyle: React.CSSProperties = isButtonHovered
     ? {
-        backgroundColor: "ffffff", // Hover olduğunda arka plan beyaz
-        color: "#666666", // Simge rengi koyu gri
-        border: "2px solid #666666", // Kenarlar koyu gri
+        border: "2px solid #666666", // Kenar rengini hover'da değiştiriyoruz
       }
     : {};
 
@@ -126,12 +124,11 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
     backgroundColor: "transparent",
   };
 
-  // Çizgi stilini hover durumuna göre güncelleme (Koyu gri renk eklendi)
   const crossLineStyle: React.CSSProperties = {
     position: "absolute",
     width: "100%",
     height: "2px",
-    backgroundColor: isButtonHovered ? "#666666" : "white", // Hover olunca koyu gri olacak
+    backgroundColor: isButtonHovered ? "#666666" : "white", // İkon rengini hover'da değiştiriyoruz
     top: "50%",
     left: "0",
     transform: "rotate(45deg)",
@@ -152,8 +149,8 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
     opacity: inView ? 1 : 0,
     transform: inView ? "translateY(0)" : "translateY(10px)",
     transition: "opacity 1.3s ease, transform 1.3s ease",
-    marginTop: "5px",
-    marginBottom: "5px",
+    marginBottom: "40px", // Kartlar arasında yeterli boşluk bırakmak için
+    zIndex: 0, // Kartın diğer elementlerin üstüne çıkmasını engelliyoruz
   };
 
   return (
@@ -165,22 +162,21 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
 
           <button
             onClick={handleFlip}
-            onMouseEnter={handleButtonMouseEnter} // Buton hover giriş
-            onMouseLeave={handleButtonMouseLeave} // Buton hover çıkış
-            style={{ ...buttonStyle, ...buttonHoverStyle }} // Hover stili eklendi
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+            style={{ ...buttonStyle, ...buttonHoverStyle }}
           >
             <span style={crossIconStyle}>
-              {/* Artı simgesi iki çizgiyle yapılıyor */}
               <span
                 style={{
                   ...crossLineStyle,
-                  transform: "rotate(90deg)", // Dikey çizgi (artı)
+                  transform: "rotate(90deg)",
                 }}
               ></span>
               <span
                 style={{
                   ...crossLineStyle,
-                  transform: "rotate(0deg)", // Yatay çizgi (artı)
+                  transform: "rotate(0deg)",
                 }}
               ></span>
             </span>
@@ -196,12 +192,11 @@ const LargeFlipCardSection: React.FC<LargeFlipCardSectionProps> = ({
         >
           {renderMedia(backMediaUrl)}
 
-          {/* Arka yüzdeki X simgesi */}
           <button
             onClick={handleFlip}
-            onMouseEnter={handleButtonMouseEnter} // Buton hover giriş
-            onMouseLeave={handleButtonMouseLeave} // Buton hover çıkış
-            style={{ ...buttonStyle, ...buttonHoverStyle }} // Hover stili eklendi
+            onMouseEnter={handleButtonMouseEnter}
+            onMouseLeave={handleButtonMouseLeave}
+            style={{ ...buttonStyle, ...buttonHoverStyle }}
           >
             <span style={crossIconStyle}>
               <span style={crossLineStyle}></span>

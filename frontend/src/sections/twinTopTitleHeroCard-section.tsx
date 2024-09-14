@@ -64,18 +64,40 @@ const TwinTopTitleHeroCardSection: React.FC<
     );
   };
 
+  // Gradyanı daha yumuşak ve siyahı azaltılmış hale getiriyoruz
+  const gradientOverlayStyle = {
+    position: "absolute" as const,
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    zIndex: 1,
+    background: `
+      linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.7) 10%,    /* Daha az yoğun siyah */
+        rgba(0, 0, 0, 0.5) 25%,    /* Hızla açılan siyah */
+        rgba(0, 0, 0, 0.3) 40%,    /* Siyahın gri tonlarına geçişi */
+        rgba(64, 64, 64, 0.2) 55%, /* Gri tonları */
+        rgba(128, 128, 128, 0.1) 70%, /* Daha açık gri */
+        rgba(192, 192, 192, 0.05) 85%, /* Neredeyse şeffaf gri */
+        rgba(192, 192, 192, 0) 100%   /* Tamamen şeffaf */
+      )
+    `,
+  };
+
   return (
     <div
-      className="flex justify-between p-5 bg-white rounded-lg mb-5 w-[1440px] mx-auto"
-      style={{ margin: "40px 0" }} // Alttan ve üsten 40px margin eklendi
+      className="flex justify-between p-5 bg-white rounded-lg mb-5 w-full max-w-[1440px] mx-auto px-5 gap-x-5" // px-5 sağ-sol boşluk ve gap-x-5 arası boşluk
     >
       {/* Left Card */}
       <div
         ref={leftRef}
-        className={`w-[48%] bg-[#DFE2E6] rounded-xl overflow-hidden relative transition-all duration-1000 ease-in-out transform ${
+        className={`w-[48%] bg-[#DFE2E6] rounded-xl overflow-hidden relative transition-all duration-1500 ease-in-out transform ${
           leftInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
         } h-[694px]`}
       >
+        <div style={gradientOverlayStyle}></div> {/* Gradyan geçişi */}
         <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-white font-sans text-center z-10">
           <h3 className="text-[30px] font-bold mb-2 tracking-wider">
             {leftTitle}
@@ -94,10 +116,11 @@ const TwinTopTitleHeroCardSection: React.FC<
       {/* Right Card */}
       <div
         ref={rightRef}
-        className={`w-[48%] bg-[#DFE2E6] rounded-xl overflow-hidden relative transition-all duration-1000 ease-in-out transform ${
+        className={`w-[48%] bg-[#DFE2E6] rounded-xl overflow-hidden relative transition-all duration-1500 ease-in-out transform ${
           rightInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
         } h-[694px]`}
       >
+        <div style={gradientOverlayStyle}></div> {/* Gradyan geçişi */}
         <div className="absolute top-5 left-1/2 transform -translate-x-1/2 text-white font-sans text-center z-10">
           <h3 className="text-[30px] font-bold mb-2 tracking-wider">
             {rightTitle}

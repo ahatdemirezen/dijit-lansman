@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useLaunchStore from "../zustands/useLaunchStore";
 import NewLaunchFormModal from "./LaunchFormModal";
 import { useNavigate } from "react-router-dom";
@@ -14,10 +14,7 @@ const homePage = () => {
   const [sortDirection, setSortDirection] = useState<
     "none" | "ascending" | "original"
   >("none");
-  const [filterStatus, setFilterStatus] = useState<
-    "all" | "active" | "inactive"
-  >("all");
-  const [searchTerm, setSearchTerm] = useState(""); // Arama çubuğu için yeni state
+
   const navigate = useNavigate();
 
   // Sayfa yüklendiğinde verileri çek
@@ -30,25 +27,6 @@ const homePage = () => {
     const filteredLaunches = launches.filter((launch) => launch.showOnHomepage);
     setSortedLaunches(filteredLaunches.reverse()); // ShowOnHomepage true olanları ters sırayla ayarlayın
   }, [launches]);
-
-  // Lansman adına göre arama fonksiyonu
-  const searchLaunches = (launches: any[]) => {
-    return launches.filter((launch) =>
-      launch.launchName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
-
-  // showOnHomepage ve isActive değerlerine göre filtreleme fonksiyonu
-  const filterShowOnHomePage = (launches: any[]) => {
-    const filteredByShowOnHomepage =
-      filterStatus === "active"
-        ? launches.filter((launch) => launch.showOnHomepage && launch.isActive)
-        : filterStatus === "inactive"
-        ? launches.filter((launch) => launch.showOnHomepage && !launch.isActive)
-        : launches.filter((launch) => launch.showOnHomepage); // Sadece showOnHomepage true olanları filtrele
-
-    return searchLaunches(filteredByShowOnHomepage); // Hem filtreleme hem arama fonksiyonunu birleştiriyoruz
-  };
 
   const handleCreateClick = () => {
     setSelectedLaunchId(null); // Yeni ekle butonuna tıklanıldığında seçili launchId sıfırlanır

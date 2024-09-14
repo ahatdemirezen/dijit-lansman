@@ -1,24 +1,28 @@
-import React, { ChangeEvent, useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
-import LargeCardSection from "../sections/largeCard-section"; // LargeCardSection'u import et
+import BannerSection from "../sections/BannerSection"; // Import BannerSection component
 
-interface LargeCardFormProps {
+interface BannerFormProps {
+  buttonText: string;
+  buttonUrl: string;
   media: string;
-  url: string;
+  onButtonTextChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onButtonUrlChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onMediaChange: (e: ChangeEvent<HTMLSelectElement>) => void;
-  onUrlChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onFormSubmit: (data: any) => void;
 }
 
-const LargeCardForm: React.FC<LargeCardFormProps> = ({
+const BannerForm: React.FC<BannerFormProps> = ({
+  buttonText,
+  buttonUrl,
   media,
-  url,
+  onButtonTextChange,
+  onButtonUrlChange,
   onMediaChange,
-  onUrlChange,
 }) => {
   const [mediaList, setMediaList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>(""); // Arama çubuğu için state eklendi
-  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // Önizleme kontrolü
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // State for preview toggle
   const modalRef = useRef<HTMLDivElement>(null);
 
   const apiUrl = import.meta.env.VITE_BE_URL;
@@ -102,10 +106,6 @@ const LargeCardForm: React.FC<LargeCardFormProps> = ({
     }
   };
 
-  const filteredMediaList = mediaList.filter((mediaItem) =>
-    mediaItem.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const handleMediaSelect = (selectedMedia: string) => {
     onMediaChange({
       target: { value: selectedMedia },
@@ -115,7 +115,35 @@ const LargeCardForm: React.FC<LargeCardFormProps> = ({
 
   return (
     <div className="flex flex-col space-y-6 p-4">
-      <div className="flex flex-col" style={{ paddingLeft: "3%" }}>
+      <div className="flex flex-col">
+        <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
+          Buton
+        </label>
+        <input
+          type="text"
+          value={buttonText}
+          onChange={onButtonTextChange}
+          placeholder="Buton Adı"
+          className="block text-gray-900 bg-white border border-gray-300 sm:text-sm"
+          style={{ width: "423px", height: "50px", borderRadius: "8px" }}
+        />
+      </div>
+
+      <div className="flex flex-col">
+        <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
+          Buton Url
+        </label>
+        <input
+          type="text"
+          value={buttonUrl}
+          onChange={onButtonUrlChange}
+          placeholder="Buton Url Alanı"
+          className="block text-gray-900 bg-white border border-gray-300 sm:text-sm"
+          style={{ width: "423px", height: "50px", borderRadius: "8px" }}
+        />
+      </div>
+
+      <div className="flex flex-col">
         <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
           Medya
         </label>
@@ -124,41 +152,28 @@ const LargeCardForm: React.FC<LargeCardFormProps> = ({
           readOnly
           value={media || "  Medya Seç"}
           onClick={() => setIsModalOpen(true)}
-          className="block border border-[#D0D5DD] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#667085] text-[16px] leading-[24px]"
+          className="block border border-[#D0D5DD] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#667085] text-[16px] leading-[24px]"
           style={{ width: "423px", height: "50px" }}
         />
         <p style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}>
-          <span style={{ color: "red" }}>*</span>960x630(px)
+          <span style={{ color: "red" }}>*</span>1270x300(px)
         </p>
-      </div>
-
-      <div className="flex flex-col" style={{ paddingLeft: "3%" }}>
-        <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
-          URL
-        </label>
-        <input
-          type="text"
-          placeholder="  URL Alanı"
-          value={url}
-          onChange={onUrlChange}
-          className="block border border-[#D0D5DD] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#667085] text-[16px] leading-[24px]"
-          style={{ width: "423px", height: "50px" }}
-        />
       </div>
 
       <button
         type="button"
+        onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Toggle preview
         className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
         style={{
-          width: "100px", // Önizleme butonunun genişliğini 100px yaptık
-          marginLeft: "3%", // Buton soldan %3 uzaklıkta
-          textAlign: "center", // Önizleme yazısını ortaladık
+          width: "100px", // Önizleme butonunun genişliği
+          marginLeft: "3%", // Buton hizalaması
+          textAlign: "center", // Metin ortalama
         }}
-        onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme butonu
       >
         Önizleme
       </button>
 
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
           <div
@@ -173,23 +188,8 @@ const LargeCardForm: React.FC<LargeCardFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Medya adına göre ara"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700"
-                style={{
-                  width: "300px",
-                  height: "40px",
-                  boxShadow: "0 0 3px rgba(0, 0, 0, 0.1)",
-                }}
-              />
-            </div>
-
             <div className="grid grid-cols-4 gap-4">
-              {filteredMediaList.map((mediaItem, index) => (
+              {mediaList.map((mediaItem, index) => (
                 <div
                   key={index}
                   onClick={() => handleMediaSelect(mediaItem)}
@@ -200,7 +200,6 @@ const LargeCardForm: React.FC<LargeCardFormProps> = ({
                 </div>
               ))}
             </div>
-
             <button
               type="button"
               className="mt-4 w-full bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
@@ -212,24 +211,27 @@ const LargeCardForm: React.FC<LargeCardFormProps> = ({
         </div>
       )}
 
-      {/* LargeCardSection'ın %50 küçültülmüş önizleme alanı */}
+      {/* Preview of BannerSection */}
       {isPreviewOpen && (
         <div
           style={{
-            transform: "scale(0.5) translateX(50%)", // %50 küçült ve soldan %50 uzaklaştır
-            transformOrigin: "top left", // Sol üst köşeden küçültme ve kaydırmayı başlat
-            margin: "0", // Otomatik margin kaldırıldı
-            width: "525px", // Kart genişliğinin %50'si
-            height: "325px", // Kart yüksekliğinin %50'si
-            marginLeft: "10%",
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçültme
+            width: "635px",
+            height: "150px",
+            marginLeft: "25%",
           }}
-          className="p-2 rounded-lg mt-6 max-w-2xl"
+          className="p-2 rounded-lg"
         >
-          <LargeCardSection media={media} url={url} />
+          <BannerSection
+            buttonText={buttonText}
+            buttonUrl={buttonUrl}
+            media={media}
+          />
         </div>
       )}
     </div>
   );
 };
 
-export default LargeCardForm;
+export default BannerForm;

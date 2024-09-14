@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import MiniCardSliderSection from "../sections/miniCardSlider-section";
 
 interface MiniCardSliderFormProps {
   cards: {
@@ -32,13 +33,17 @@ const MiniCardSliderForm: React.FC<MiniCardSliderFormProps> = ({
   onAddCard,
   onRemoveCard,
 }) => {
-  const [mediaList, setMediaList] = useState<string[]>([]);
+  const [mediaList, setMediaList] = useState<
+    { key: string; launchName: string }[]
+  >([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [selectedMediaType, setSelectedMediaType] = useState<
     "logoMedia" | "backgroundMedia" | null
   >(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   const apiUrl = import.meta.env.VITE_BE_URL;
 
@@ -46,7 +51,10 @@ const MiniCardSliderForm: React.FC<MiniCardSliderFormProps> = ({
     const fetchMediaList = async () => {
       try {
         const response = await axios.get(`${apiUrl}/media/list`);
-        const mediaNames = response.data.map((media: any) => media.Key);
+        const mediaNames = response.data.map((media: any) => ({
+          key: media.Key,
+          launchName: media.launchName || "",
+        }));
         setMediaList(mediaNames);
       } catch (error) {
         console.error("Medya listesi alınamadı:", error);
@@ -136,6 +144,12 @@ const MiniCardSliderForm: React.FC<MiniCardSliderFormProps> = ({
     }
   };
 
+  const filteredMediaList = mediaList.filter(
+    (mediaItem) =>
+      mediaItem.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mediaItem.launchName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col items-center">
       <div
@@ -216,6 +230,11 @@ const MiniCardSliderForm: React.FC<MiniCardSliderFormProps> = ({
                 className="block w-full p-3 border border-[#D1D5DB] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6366F1] text-[#4B5563]"
                 style={{ width: "288px", height: "50px", borderRadius: "8px" }}
               />
+              <p
+                style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}
+              >
+                <span style={{ color: "red" }}>*</span>400x230(px)
+              </p>
             </div>
             <div className="mb-4">
               <label className="block text-sm text-[#1F2937] mb-1">
@@ -246,9 +265,15 @@ const MiniCardSliderForm: React.FC<MiniCardSliderFormProps> = ({
                 className="block w-full p-3 border border-[#D1D5DB] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6366F1] text-[#4B5563]"
                 style={{ width: "288px", height: "50px", borderRadius: "8px" }}
               />
+              <p
+                style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}
+              >
+                <span style={{ color: "red" }}>*</span>50x50(px)
+              </p>
             </div>
           </div>
         ))}
+
         <div className="flex items-center">
           <button
             onClick={onAddCard}
@@ -273,6 +298,34 @@ const MiniCardSliderForm: React.FC<MiniCardSliderFormProps> = ({
         </div>
       </div>
 
+      {/* Önizleme Butonu */}
+      <div className="w-full mt-4 flex justify-start">
+        <button
+          type="button"
+          className="ml-10 bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+          style={{ width: "120px", textAlign: "center" }}
+          onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme açılır/kapanır
+        >
+          Önizleme
+        </button>
+      </div>
+
+      {/* Section'un %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçült
+            margin: "20px auto",
+            width: "100%",
+            height: "200px",
+            marginLeft: "5%",
+          }}
+        >
+          <MiniCardSliderSection cards={cards} />
+        </div>
+      )}
+
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
           <div
@@ -287,15 +340,28 @@ const MiniCardSliderForm: React.FC<MiniCardSliderFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
+            <input
+              type="text"
+              placeholder="Medya adına veya lansman adına göre arama"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700 mb-4"
+              style={{ width: "300px", height: "40px" }}
+            />
             <div className="grid grid-cols-4 gap-4">
-              {mediaList.map((mediaItem, index) => (
+              {filteredMediaList.map((mediaItem, index) => (
                 <div
                   key={index}
-                  onClick={() => handleMediaSelect(mediaItem)}
+                  onClick={() => handleMediaSelect(mediaItem.key)}
                   className="cursor-pointer"
                 >
-                  {renderFilePreview(mediaItem)}
-                  <p className="text-center text-sm truncate">{mediaItem}</p>
+                  {renderFilePreview(mediaItem.key)}
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.key}
+                  </p>
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.launchName}
+                  </p>
                 </div>
               ))}
             </div>

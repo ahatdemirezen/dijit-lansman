@@ -1,5 +1,6 @@
-import React, { useState, useEffect, ChangeEvent, useRef } from "react"; // useRef'i buraya ekledim
+import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import AccordionRightCardSection from "../sections/AccordionRightCard-section";
 
 interface AccordionRightCardFormProps {
   media: string;
@@ -13,7 +14,7 @@ interface AccordionRightCardFormProps {
   ) => void;
   onAccordianSubTitleChange: (
     index: number,
-    e: ChangeEvent<HTMLInputElement>
+    e: ChangeEvent<HTMLTextAreaElement>
   ) => void;
 }
 
@@ -26,9 +27,17 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
   onAccordianTitleChange,
   onAccordianSubTitleChange,
 }) => {
-  const [mediaList, setMediaList] = useState<string[]>([]);
+  const [mediaList, setMediaList] = useState<
+    { key: string; launchName: string }[]
+  >([]); // Lansman adına göre medya listesi
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [charCounts, setCharCounts] = useState<number[]>(
+    accordian.map(() => 0)
+  );
+  const [errors, setErrors] = useState<string[]>(accordian.map(() => ""));
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Arama çubuğu için state
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
   const apiUrl = import.meta.env.VITE_BE_URL;
 
@@ -36,7 +45,10 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
     const fetchMediaList = async () => {
       try {
         const response = await axios.get(`${apiUrl}/media/list`);
-        const mediaNames = response.data.map((media: any) => media.Key);
+        const mediaNames = response.data.map((media: any) => ({
+          key: media.Key,
+          launchName: media.launchName,
+        }));
         setMediaList(mediaNames);
       } catch (error) {
         console.error("Medya listesi alınamadı:", error);
@@ -46,7 +58,6 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
     fetchMediaList();
   }, []);
 
-  // Modal dışında tıklanırsa kapatmayı sağlayan fonksiyon
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -68,7 +79,6 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
     };
   }, [isModalOpen]);
 
-  // Medya önizleme fonksiyonu
   const renderFilePreview = (file: string) => {
     const fileType = file.split(".").pop()?.toLowerCase();
     const previewStyle = "w-full h-32 object-cover mb-2";
@@ -113,13 +123,48 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
     }
   };
 
-  // Medya seçimi yapıldıktan sonra media state'ini güncelleyen fonksiyon
   const handleMediaSelect = (selectedMedia: string) => {
     onMediaChange({
       target: { value: selectedMedia },
     } as ChangeEvent<HTMLSelectElement>);
-    setIsModalOpen(false); // Modalı kapatıyoruz
+    setIsModalOpen(false);
   };
+
+  const handleSubTitleChange = (
+    index: number,
+    e: ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const newText = e.target.value;
+    const updatedCharCounts = [...charCounts];
+    const updatedErrors = [...errors];
+
+    if (newText.length <= 200) {
+      updatedErrors[index] = "";
+      updatedCharCounts[index] = newText.length;
+      onAccordianSubTitleChange(index, e);
+    } else {
+      updatedErrors[index] = "Karakter sınırını aştınız!";
+      updatedCharCounts[index] = 200;
+      const truncatedEvent = {
+        ...e,
+        target: { ...e.target, value: newText.slice(0, 200) },
+      };
+      onAccordianSubTitleChange(
+        index,
+        truncatedEvent as ChangeEvent<HTMLTextAreaElement>
+      );
+    }
+
+    setCharCounts(updatedCharCounts);
+    setErrors(updatedErrors);
+  };
+
+  // Lansman adına göre medya filtreleme
+  const filteredMediaList = mediaList.filter(
+    (mediaItem) =>
+      mediaItem.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mediaItem.launchName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col items-center">
@@ -144,17 +189,28 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
           <input
             type="text"
             readOnly
-            value={media || "Media Seç"} // Başlangıç ismini buraya ekledim
-            onClick={() => setIsModalOpen(true)} // Modalı açan buton
+            value={media || "Media Seç"}
+            onClick={() => setIsModalOpen(true)}
             className="block text-gray-900 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
             style={{
-              width: "396px", // Genişlik (396px)
-              height: "50px", // Yükseklik (50px)
-              padding: "10px 16px", // İç boşluklar (Padding)
-              borderRadius: "8px", // Kenar yuvarlama
-              outline: "none", // Mavi çerçeveyi kaldırmak için
+              width: "396px",
+              height: "50px",
+              padding: "10px 16px",
+              borderRadius: "8px",
+              outline: "none",
             }}
           />
+
+          <p
+            style={{
+              color: "#667085",
+              fontSize: "12px",
+              marginTop: "4px",
+              marginLeft: "2px",
+            }}
+          >
+            <span style={{ color: "red" }}>*</span>530x790(px)
+          </p>
         </div>
 
         {/* Modal */}
@@ -167,20 +223,40 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
               <button
                 type="button"
                 className="absolute top-2 right-2 text-[#970928] bg-white rounded-full p-2 hover:bg-gray-100 transition transform duration-150 ease-in-out"
-                onClick={() => setIsModalOpen(false)} // Kapatma butonu eklendi
+                onClick={() => setIsModalOpen(false)}
               >
                 X
               </button>
               <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Lansman Adına Göre Ara"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700"
+                  style={{
+                    width: "300px",
+                    height: "40px",
+                    boxShadow: "0 0 3px rgba(0, 0, 0, 0.1)",
+                  }}
+                />
+              </div>
               <div className="grid grid-cols-4 gap-4">
-                {mediaList.map((mediaItem, index) => (
+                {filteredMediaList.map((mediaItem, index) => (
                   <div
                     key={index}
-                    onClick={() => handleMediaSelect(mediaItem)}
+                    onClick={() => handleMediaSelect(mediaItem.key)}
                     className="cursor-pointer"
                   >
-                    {renderFilePreview(mediaItem)}
-                    <p className="text-center text-sm truncate">{mediaItem}</p>
+                    {renderFilePreview(mediaItem.key)}
+                    <p className="text-center text-sm truncate">
+                      {mediaItem.key}
+                    </p>
+                    <p className="text-center text-sm truncate">
+                      {mediaItem.launchName}
+                    </p>{" "}
+                    {/* Lansman adı gösteriliyor */}
                   </div>
                 ))}
               </div>
@@ -237,17 +313,23 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
                 className="block w-full p-3 border border-[#D1D5DB] rounded-lg shadow-sm text-[#1F2937] focus:outline-none focus:ring-2 focus:ring-[#6366F1]"
               />
             </div>
+
             <div className="mb-4">
-              <label className="block text-sm text-[#1F2937] mb-1">
-                Alt Başlık
-              </label>
-              <input
-                type="text"
-                value={section.subTitle}
-                onChange={(e) => onAccordianSubTitleChange(index, e)}
-                placeholder="Input"
-                className="block w-full p-3 border border-[#D1D5DB] rounded-lg shadow-sm text-[#1F2937] focus:outline-none focus:ring-2 focus:ring-[#6366F1]"
+              <label className="block text-sm text-[#1F2937] mb-1">Yazı</label>
+              <textarea
+                value={section.subTitle.slice(0, 200)}
+                onChange={(e) => handleSubTitleChange(index, e)}
+                placeholder="Yazı Alanı"
+                className="block w-full text-gray-900 bg-white border border-gray-300 sm:text-sm p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6366F1]"
+                rows={3}
+                style={{ resize: "none" }}
               />
+              {errors[index] && (
+                <p className="text-red-500 text-xs mt-1">{errors[index]}</p>
+              )}
+              <div className="text-right text-sm text-gray-500 mt-1">
+                {charCounts[index]}/200
+              </div>
             </div>
           </div>
         ))}
@@ -257,22 +339,49 @@ const AccordionRightCardForm: React.FC<AccordionRightCardFormProps> = ({
             onClick={onAddAccordianItem}
             className="bg-[#FCFCFC] text-[#353642] border border-[#D6D6D6] rounded-lg shadow-xs focus:outline-none"
             style={{
-              width: "184px", // Genişlik
-              height: "40px", // Yükseklik
-              padding: "10px 16px", // İçerik iç boşlukları
-              borderRadius: "8px", // Kenar yuvarlama
-              border: "1px solid #D6D6D6", // Sınır rengi
-              boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)", // Gölge efekti
-              fontFamily: "Poppins", // Yazı tipi
-              fontSize: "14px", // Yazı boyutu
-              color: "#101828", // Yazı rengi
-              textAlign: "left", // Sol hizalama
+              width: "184px",
+              height: "40px",
+              padding: "10px 16px",
+              borderRadius: "8px",
+              border: "1px solid #D6D6D6",
+              boxShadow: "0px 1px 2px rgba(16, 24, 40, 0.05)",
+              fontFamily: "Poppins",
+              fontSize: "14px",
+              color: "#101828",
+              textAlign: "left",
             }}
           >
             Accordion Bölüm Ekle
           </button>
         </div>
       </div>
+      {/* Önizleme Butonu */}
+      <div className="w-full mt-4">
+        <button
+          type="button"
+          className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+          style={{ width: "100px", textAlign: "center", marginLeft: "3%" }}
+          onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme açılır/kapanır
+        >
+          Önizleme
+        </button>
+      </div>
+
+      {/* Section'un %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçült
+            margin: "20px auto",
+            width: "100%",
+            height: "400px",
+            marginLeft: "27%",
+          }}
+        >
+          <AccordionRightCardSection media={media} accordian={accordian} />
+        </div>
+      )}
     </div>
   );
 };

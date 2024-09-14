@@ -1,5 +1,6 @@
-import React, { useState, useEffect, ChangeEvent, useRef } from "react"; // useRef eklendi
+import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import InfoCardSliderSection from "../sections/infoCardSlider-section"; // InfoCardSliderSection'u import et
 
 interface InfoCardSliderFormProps {
   items: {
@@ -26,6 +27,8 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
   const [mediaList, setMediaList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null); // Seçilen item ID'si için state
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Arama çubuğu için state eklendi
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // Önizleme için state
   const modalRef = useRef<HTMLDivElement>(null); // useRef eklendi
 
   const apiUrl = import.meta.env.VITE_BE_URL;
@@ -115,6 +118,11 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
     }
   };
 
+  // Medya ve lansman adına göre filtreleme işlemi
+  const filteredMediaList = mediaList.filter((mediaItem) =>
+    mediaItem.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // Medya seçimi yapıldıktan sonra icon state'ini güncelleyen fonksiyon
   const handleMediaSelect = (selectedMedia: string) => {
     if (selectedItemId !== null) {
@@ -180,6 +188,12 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
                 }}
                 className="block w-full p-3 border border-[#D1D5DB] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6366F1] text-[#4B5563]"
               />
+              {/* Yıldız işaretli medya ölçüsü ekleniyor */}
+              <p
+                style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}
+              >
+                <span style={{ color: "red" }}>*</span>100x100(px)
+              </p>
             </div>
 
             <div className="mb-4">
@@ -208,6 +222,7 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
             </div>
           </div>
         ))}
+
         <div className="flex items-center">
           <button
             onClick={onAddItem}
@@ -252,8 +267,25 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
                 X
               </button>
               <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
+
+              {/* Arama çubuğu */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Medya adına göre ara"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700"
+                  style={{
+                    width: "300px",
+                    height: "40px",
+                    boxShadow: "0 0 3px rgba(0, 0, 0, 0.1)",
+                  }}
+                />
+              </div>
+
               <div className="grid grid-cols-4 gap-4">
-                {mediaList.map((mediaItem, index) => (
+                {filteredMediaList.map((mediaItem, index) => (
                   <div
                     key={index}
                     onClick={() => handleMediaSelect(mediaItem)}
@@ -275,6 +307,39 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
           </div>
         )}
       </div>
+
+      {/* Önizleme Butonu */}
+      <div className="w-full mt-4">
+        <button
+          type="button"
+          className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+          style={{
+            width: "100px",
+            textAlign: "center",
+            marginLeft: "3%",
+          }}
+          onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme butonuna basılınca açılıp kapanıyor
+        >
+          Önizleme
+        </button>
+      </div>
+
+      {/* InfoCardSliderSection'ın %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçült
+            margin: "0 auto", // Ortalamak için
+            width: "100%", // Orijinal genişliğin yarısı
+            height: "150px",
+            marginLeft: "40%",
+          }}
+          className="p-2 rounded-lg mt-6"
+        >
+          <InfoCardSliderSection items={items} />
+        </div>
+      )}
     </div>
   );
 };

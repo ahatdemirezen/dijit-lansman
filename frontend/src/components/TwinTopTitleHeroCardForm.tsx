@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import TwinTopTitleHeroCardSection from "../sections/twinTopTitleHeroCard-section";
 
 interface TwinTopTitleHeroCardFormProps {
   rightMedia: string;
@@ -46,11 +47,17 @@ const TwinTopTitleHeroCardForm: React.FC<TwinTopTitleHeroCardFormProps> = ({
   onLeftButtonTextChange,
   onLeftButtonUrlChange,
 }) => {
-  const [mediaList, setMediaList] = useState<string[]>([]);
+  const [mediaList, setMediaList] = useState<
+    { Key: string; launchName: string }[]
+  >([]);
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [isRightMediaModalOpen, setIsRightMediaModalOpen] =
     useState<boolean>(false);
   const [isLeftMediaModalOpen, setIsLeftMediaModalOpen] =
     useState<boolean>(false);
+  const [rightMediaSearchTerm, setRightMediaSearchTerm] = useState<string>("");
+  const [leftMediaSearchTerm, setLeftMediaSearchTerm] = useState<string>("");
+
   const rightMediaModalRef = useRef<HTMLDivElement>(null);
   const leftMediaModalRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +68,10 @@ const TwinTopTitleHeroCardForm: React.FC<TwinTopTitleHeroCardFormProps> = ({
     const fetchMediaList = async () => {
       try {
         const response = await axios.get(`${apiUrl}/media/list`);
-        const mediaNames = response.data.map((media: any) => media.Key);
+        const mediaNames = response.data.map((media: any) => ({
+          Key: media.Key,
+          launchName: media.launchName || "Unknown",
+        }));
         setMediaList(mediaNames);
       } catch (error) {
         console.error("Medya listesi alınamadı:", error);
@@ -160,6 +170,26 @@ const TwinTopTitleHeroCardForm: React.FC<TwinTopTitleHeroCardFormProps> = ({
     setIsLeftMediaModalOpen(false); // Modalı kapat
   };
 
+  // Right Media arama fonksiyonu
+  const filteredRightMediaList = mediaList.filter(
+    (mediaItem) =>
+      mediaItem.Key.toLowerCase().includes(
+        rightMediaSearchTerm.toLowerCase()
+      ) ||
+      mediaItem.launchName
+        .toLowerCase()
+        .includes(rightMediaSearchTerm.toLowerCase())
+  );
+
+  // Left Media arama fonksiyonu
+  const filteredLeftMediaList = mediaList.filter(
+    (mediaItem) =>
+      mediaItem.Key.toLowerCase().includes(leftMediaSearchTerm.toLowerCase()) ||
+      mediaItem.launchName
+        .toLowerCase()
+        .includes(leftMediaSearchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col items-center">
       <div
@@ -187,6 +217,11 @@ const TwinTopTitleHeroCardForm: React.FC<TwinTopTitleHeroCardFormProps> = ({
                 onClick={() => setIsRightMediaModalOpen(true)}
                 className="block w-full p-3 border border-gray-300 rounded-lg shadow-sm"
               />
+              <p
+                style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}
+              >
+                <span style={{ color: "red" }}>*</span>440x700(px)
+              </p>
             </div>
             <div className="mt-4">
               <label className="block text-sm text-gray-700 mb-1">Başlık</label>
@@ -250,6 +285,11 @@ const TwinTopTitleHeroCardForm: React.FC<TwinTopTitleHeroCardFormProps> = ({
                 onClick={() => setIsLeftMediaModalOpen(true)}
                 className="block w-full p-3 border border-gray-300 rounded-lg shadow-sm"
               />
+              <p
+                style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}
+              >
+                <span style={{ color: "red" }}>*</span>440x700(px)
+              </p>
             </div>
             <div className="mt-4">
               <label className="block text-sm text-gray-700 mb-1">Başlık</label>
@@ -316,15 +356,27 @@ const TwinTopTitleHeroCardForm: React.FC<TwinTopTitleHeroCardFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Right Medya Seç</h3>
+            <input
+              type="text"
+              placeholder="Medya veya lansman adına göre ara"
+              value={rightMediaSearchTerm}
+              onChange={(e) => setRightMediaSearchTerm(e.target.value)}
+              className="mb-4 p-2 border border-gray-300 rounded-lg w-full"
+            />
             <div className="grid grid-cols-4 gap-4">
-              {mediaList.map((mediaItem, index) => (
+              {filteredRightMediaList.map((mediaItem, index) => (
                 <div
                   key={index}
-                  onClick={() => handleRightMediaSelect(mediaItem)}
+                  onClick={() => handleRightMediaSelect(mediaItem.Key)}
                   className="cursor-pointer"
                 >
-                  {renderFilePreview(mediaItem)}
-                  <p className="text-center text-sm truncate">{mediaItem}</p>
+                  {renderFilePreview(mediaItem.Key)}
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.Key}
+                  </p>
+                  <p className="text-center text-xs text-gray-500 truncate">
+                    {mediaItem.launchName}
+                  </p>
                 </div>
               ))}
             </div>
@@ -347,19 +399,69 @@ const TwinTopTitleHeroCardForm: React.FC<TwinTopTitleHeroCardFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Left Medya Seç</h3>
+            <input
+              type="text"
+              placeholder="Medya veya lansman adına göre ara"
+              value={leftMediaSearchTerm}
+              onChange={(e) => setLeftMediaSearchTerm(e.target.value)}
+              className="mb-4 p-2 border border-gray-300 rounded-lg w-full"
+            />
             <div className="grid grid-cols-4 gap-4">
-              {mediaList.map((mediaItem, index) => (
+              {filteredLeftMediaList.map((mediaItem, index) => (
                 <div
                   key={index}
-                  onClick={() => handleLeftMediaSelect(mediaItem)}
+                  onClick={() => handleLeftMediaSelect(mediaItem.Key)}
                   className="cursor-pointer"
                 >
-                  {renderFilePreview(mediaItem)}
-                  <p className="text-center text-sm truncate">{mediaItem}</p>
+                  {renderFilePreview(mediaItem.Key)}
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.Key}
+                  </p>
+                  <p className="text-center text-xs text-gray-500 truncate">
+                    {mediaItem.launchName}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+      )}
+      {/* Önizleme Butonu */}
+      <div className="w-full mt-4 flex justify-start">
+        <button
+          type="button"
+          className="ml-10 bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+          style={{ width: "120px", textAlign: "center" }}
+          onClick={() => setIsPreviewOpen(!isPreviewOpen)}
+        >
+          Önizleme
+        </button>
+      </div>
+
+      {/* %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)",
+            transformOrigin: "top left",
+            margin: "20px auto",
+            width: "100%",
+            height: "350px",
+            marginLeft: "27%",
+          }}
+        >
+          <TwinTopTitleHeroCardSection
+            rightMedia={rightMedia}
+            rightTitle={rightTitle}
+            rightSubTitle={rightSubTitle}
+            rightButtonText={rightButtonText}
+            rightButtonUrl={rightButtonUrl}
+            leftMedia={leftMedia}
+            leftTitle={leftTitle}
+            leftSubTitle={leftSubTitle}
+            leftButtonText={leftButtonText}
+            leftButtonUrl={leftButtonUrl}
+          />
         </div>
       )}
     </div>

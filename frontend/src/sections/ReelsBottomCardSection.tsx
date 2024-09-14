@@ -1,38 +1,24 @@
 import React, { useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes } from "react-icons/fa";
 
-interface ReelsCardItem {
+interface ReelsBottomCardItem {
   media: string;
   title: string;
   subTitle: string;
+  buttonText: string;
+  buttonUrl: string;
 }
 
-interface ReelsCardSliderSectionProps {
-  items: ReelsCardItem[];
+interface ReelsBottomCardSectionProps {
+  items: ReelsBottomCardItem[];
 }
 
-const ReelsCardSliderSection: React.FC<ReelsCardSliderSectionProps> = ({
+const ReelsBottomCardSection: React.FC<ReelsBottomCardSectionProps> = ({
   items,
 }) => {
-  const [selectedItem, setSelectedItem] = useState<ReelsCardItem | null>(null);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
-  const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.8 },
-  };
-
-  const closeModal = () => {
-    setSelectedItem(null);
-  };
-
-  const openModal = (item: ReelsCardItem) => {
-    setSelectedItem(item);
-  };
-
+  // Media rendering function
   const renderMedia = (mediaUrl: string, style?: React.CSSProperties) => {
     const fileType = mediaUrl.split(".").pop()?.toLowerCase();
 
@@ -45,11 +31,11 @@ const ReelsCardSliderSection: React.FC<ReelsCardSliderSectionProps> = ({
             ...style,
             width: "100%",
             height: "100%",
-            objectFit: "contain", // Görseli tam olarak sığdır
+            objectFit: "contain",
             zIndex: 0,
           }}
         >
-          Tarayıcınız video etiketini desteklemiyor.
+          Your browser does not support the video tag.
         </video>
       );
     }
@@ -105,7 +91,7 @@ const ReelsCardSliderSection: React.FC<ReelsCardSliderSectionProps> = ({
 
   const textOverlayStyle: React.CSSProperties = {
     position: "absolute",
-    bottom: "20px",
+    bottom: "70px", // Updated to leave space for the button
     left: "50%",
     transform: "translateX(-50%)",
     color: "white",
@@ -124,54 +110,34 @@ const ReelsCardSliderSection: React.FC<ReelsCardSliderSectionProps> = ({
     fontSize: "16px",
   };
 
-  // Tam ekran için modalContentStyle ayarı
-  const modalContentStyle: React.CSSProperties = {
-    position: "relative",
-    width: "80vw", // Genişliği yüzde olarak belirle
-    height: "80vh", // Yüksekliği sabitle
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden", // Taşma olmasın
-    borderRadius: "10px",
-  };
-
-  // Tam ekran media için stil (Sabit ölçülerle)
-  const modalImageStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain", // Görseli sığdır (oranı bozmadan)
-    borderRadius: "10px",
-  };
-
-  // Çarpı butonuna hover efekti için stil
-  const closeButtonStyle: React.CSSProperties = {
+  const buttonStyle: React.CSSProperties = {
     position: "absolute",
-    top: "10px",
-    right: "10px",
-    width: "40px",
-    height: "40px",
-    backgroundColor: "transparent",
-    border: "2px solid white",
-    borderRadius: "50%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    bottom: "20px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    padding: "10px 20px",
+    backgroundColor: "transparent", // Transparent background
+    color: "#fff", // White text
+    border: "2px solid white", // White border
+    borderRadius: "8px",
     cursor: "pointer",
-    fontSize: "24px",
-    transition: "all 0.3s ease",
+    textDecoration: "none",
+    zIndex: 1,
+    transition: "all 0.3s ease", // Smooth transition on hover
   };
 
+  // Hover effect with color #666666
   const buttonHoverStyle: React.CSSProperties = isButtonHovered
     ? {
-        backgroundColor: "transparent",
-        color: "#666666",
-        border: "2px solid #666666",
+        backgroundColor: "transparent", // Keep background transparent
+        color: "#666666", // Change text color to #666666
+        border: "2px solid #666666", // Change border color to #666666
       }
     : {};
 
   return (
     <>
+      {/* Slider Section */}
       <div style={sliderStyle}>
         {items.map((item, index) => {
           const { ref, inView } = useInView({
@@ -198,59 +164,36 @@ const ReelsCardSliderSection: React.FC<ReelsCardSliderSectionProps> = ({
                   : "translateY(20px)";
                 element.style.boxShadow = "";
               }}
-              onClick={() => openModal(item)}
             >
+              {/* Media Render */}
               {renderMedia(
                 `${import.meta.env.VITE_AWS_S3_BUCKET_URL}/${item.media}`
               )}
+
+              {/* Text and Subtitle Overlay */}
               <div style={textOverlayStyle}>
                 <h3 style={titleStyle}>{item.title}</h3>
                 <p style={subtitleStyle}>{item.subTitle}</p>
               </div>
+
+              {/* Button */}
+              <a
+                href={item.buttonUrl}
+                style={{
+                  ...buttonStyle,
+                  ...(isButtonHovered ? buttonHoverStyle : {}),
+                }}
+                onMouseEnter={() => setIsButtonHovered(true)}
+                onMouseLeave={() => setIsButtonHovered(false)}
+              >
+                {item.buttonText}
+              </a>
             </div>
           );
         })}
       </div>
-
-      {/* Modal */}
-      <AnimatePresence>
-        {selectedItem && (
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={modalVariants}
-            transition={{ duration: 0.5 }}
-            className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50"
-          >
-            <motion.div style={modalContentStyle}>
-              {/* Close Button */}
-              <motion.button
-                onClick={closeModal}
-                style={{ ...closeButtonStyle, ...buttonHoverStyle }}
-                onMouseEnter={() => setIsButtonHovered(true)}
-                onMouseLeave={() => setIsButtonHovered(false)}
-              >
-                <FaTimes
-                  className={`text-xl ${
-                    isButtonHovered ? "text-[#666666]" : "text-white"
-                  }`}
-                />
-              </motion.button>
-
-              {/* Render Selected Item Media */}
-              {renderMedia(
-                `${import.meta.env.VITE_AWS_S3_BUCKET_URL}/${
-                  selectedItem?.media
-                }`,
-                modalImageStyle
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 };
 
-export default ReelsCardSliderSection;
+export default ReelsBottomCardSection;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import TopTextCardSection from "../sections/topTextCard-section"; // TopTextCardSection'u import et
 
 interface TopTextCardFormProps {
   text: string;
@@ -14,8 +15,12 @@ const TopTextCardForm: React.FC<TopTextCardFormProps> = ({
   onTextChange,
   onMediaChange,
 }) => {
-  const [mediaList, setMediaList] = useState<string[]>([]);
+  const [mediaList, setMediaList] = useState<
+    { key: string; launchName: string }[]
+  >([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Arama için state
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // Önizleme için state
   const modalRef = useRef<HTMLDivElement>(null);
 
   const apiUrl = import.meta.env.VITE_BE_URL;
@@ -24,7 +29,10 @@ const TopTextCardForm: React.FC<TopTextCardFormProps> = ({
     const fetchMediaList = async () => {
       try {
         const response = await axios.get(`${apiUrl}/media/list`);
-        const mediaNames = response.data.map((media: any) => media.Key); // Medya isimlerini alıyoruz
+        const mediaNames = response.data.map((media: any) => ({
+          key: media.Key,
+          launchName: media.launchName || "", // Lansman adını ekliyoruz
+        }));
         setMediaList(mediaNames);
       } catch (error) {
         console.error("Medya listesi alınamadı:", error);
@@ -106,6 +114,13 @@ const TopTextCardForm: React.FC<TopTextCardFormProps> = ({
     setIsModalOpen(false);
   };
 
+  // Arama için filtreleme
+  const filteredMediaList = mediaList.filter(
+    (mediaItem) =>
+      mediaItem.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mediaItem.launchName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col space-y-6 p-4">
       <div className="flex flex-col">
@@ -155,6 +170,33 @@ const TopTextCardForm: React.FC<TopTextCardFormProps> = ({
             outline: "none",
           }}
         />
+        {/* Yıldız işaretli medya ölçüsü ekleniyor, %3 uzaklıkta */}
+        <p
+          style={{
+            color: "#667085",
+            fontSize: "12px",
+            marginTop: "4px",
+            marginLeft: "3%",
+          }}
+        >
+          <span style={{ color: "red" }}>*</span>1040x400(px)
+        </p>
+      </div>
+
+      {/* Önizleme Butonu */}
+      <div className="w-full mt-4">
+        <button
+          type="button"
+          className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+          style={{
+            width: "100px",
+            textAlign: "center",
+            marginLeft: "3%", // Buton soldan %3 uzaklıkta
+          }}
+          onClick={() => setIsPreviewOpen(!isPreviewOpen)}
+        >
+          Önizleme
+        </button>
       </div>
 
       {isModalOpen && (
@@ -171,15 +213,28 @@ const TopTextCardForm: React.FC<TopTextCardFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
+            <input
+              type="text"
+              placeholder="Medya adına veya lansman adına göre arama"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700 mb-4"
+              style={{ width: "300px", height: "40px" }}
+            />
             <div className="grid grid-cols-4 gap-4">
-              {mediaList.map((mediaItem, index) => (
+              {filteredMediaList.map((mediaItem, index) => (
                 <div
                   key={index}
-                  onClick={() => handleMediaSelect(mediaItem)}
+                  onClick={() => handleMediaSelect(mediaItem.key)}
                   className="cursor-pointer"
                 >
-                  {renderFilePreview(mediaItem)}
-                  <p className="text-center text-sm truncate">{mediaItem}</p>
+                  {renderFilePreview(mediaItem.key)}
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.key}
+                  </p>
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.launchName}
+                  </p>
                 </div>
               ))}
             </div>
@@ -191,6 +246,23 @@ const TopTextCardForm: React.FC<TopTextCardFormProps> = ({
               Kapat
             </button>
           </div>
+        </div>
+      )}
+
+      {/* TopTextCardSection'ın %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçült
+            margin: "0 auto", // Ortalamak için
+            width: "100%", // Orijinal genişliğin yarısı
+            height: "340px",
+            marginLeft: "10%",
+          }}
+          className="p-2 rounded-lg mt-6"
+        >
+          <TopTextCardSection text={text} media={media} />
         </div>
       )}
     </div>

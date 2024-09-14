@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import BottomTextCardSection from "../sections/BottomTextCardSection"; // BottomTextCardSection'u import et
 
 interface BottomTextCardFormProps {
   text: string;
@@ -16,6 +17,9 @@ const BottomTextCardForm: React.FC<BottomTextCardFormProps> = ({
 }) => {
   const [mediaList, setMediaList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [charCount, setCharCount] = useState<number>(text.length); // Karakter sayacı
+  const [error, setError] = useState<string>(""); // Hata mesajı için state
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // Önizleme kontrolü için state
   const modalRef = useRef<HTMLDivElement>(null);
 
   const apiUrl = import.meta.env.VITE_BE_URL;
@@ -106,6 +110,19 @@ const BottomTextCardForm: React.FC<BottomTextCardFormProps> = ({
     setIsModalOpen(false);
   };
 
+  // Karakter sınırı kontrolü
+  const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value;
+
+    if (newText.length <= 250) {
+      setError(""); // Hata mesajını temizliyoruz
+      onTextChange(e);
+    } else {
+      setError("Karakter sınırını aştınız!"); // Hata mesajı
+    }
+    setCharCount(newText.length > 250 ? 250 : newText.length); // Karakter sayacını sınırla güncelliyoruz
+  };
+
   return (
     <div className="flex flex-col space-y-6 p-4">
       <div className="flex flex-col">
@@ -130,6 +147,16 @@ const BottomTextCardForm: React.FC<BottomTextCardFormProps> = ({
             outline: "none",
           }}
         />
+        <p
+          style={{
+            color: "#667085",
+            fontSize: "12px",
+            marginTop: "4px",
+            marginLeft: "3%",
+          }}
+        >
+          <span style={{ color: "red" }}>*</span>1040x400(px)
+        </p>
       </div>
 
       <div className="flex flex-col">
@@ -140,8 +167,8 @@ const BottomTextCardForm: React.FC<BottomTextCardFormProps> = ({
           Yazı
         </label>
         <textarea
-          value={text}
-          onChange={onTextChange}
+          value={text.slice(0, 250)} // Text sınırı burada zorlanıyor
+          onChange={handleTextChange} // Karakter sınırı kontrolü fonksiyonunu bağlıyoruz
           placeholder="Yazı Alanı"
           className="block text-gray-900 bg-white border border-gray-300 sm:text-sm"
           rows={4}
@@ -155,8 +182,35 @@ const BottomTextCardForm: React.FC<BottomTextCardFormProps> = ({
             outline: "none",
           }}
         />
+        {/* Hata mesajı ve karakter sayacı textarea'nın altında */}
+        {error && (
+          <p className="text-red-500 text-xs mt-1" style={{ marginLeft: "3%" }}>
+            {error}
+          </p>
+        )}
+        <div
+          className="text-right text-sm text-gray-500 mt-1"
+          style={{ marginLeft: "3%" }}
+        >
+          {charCount}/250
+        </div>
       </div>
 
+      {/* Önizleme Butonu */}
+      <button
+        type="button"
+        className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+        style={{
+          width: "100px", // Önizleme butonunun genişliği
+          marginLeft: "3%", // Buton soldan %3 uzaklıkta
+          textAlign: "center", // Metni ortalıyoruz
+        }}
+        onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme butonuna basılınca tetiklenen işlev
+      >
+        Önizleme
+      </button>
+
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
           <div
@@ -191,6 +245,22 @@ const BottomTextCardForm: React.FC<BottomTextCardFormProps> = ({
               Kapat
             </button>
           </div>
+        </div>
+      )}
+
+      {/* BottomTextCardSection'ın %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçült
+            margin: "0 auto", // Ortalamak için
+            width: "520px", // %50 oranında küçültülmüş genişlik
+            height: "320px", // %50 oranında küçültülmüş yükseklik
+          }}
+          className="p-2 rounded-lg mt-6"
+        >
+          <BottomTextCardSection text={text} media={media} />
         </div>
       )}
     </div>

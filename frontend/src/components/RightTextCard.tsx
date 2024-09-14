@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import RightTextCardSection from "../sections/rightTextCardSlider-section"; // RightTextCardSection'u import et
 
 interface RightTextCardFormProps {
   text: string;
@@ -14,8 +15,14 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
   onTextChange,
   onMediaChange,
 }) => {
-  const [mediaList, setMediaList] = useState<string[]>([]);
+  const [mediaList, setMediaList] = useState<
+    { key: string; launchName: string }[]
+  >([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [charCount, setCharCount] = useState<number>(text.length); // Karakter sayacı
+  const [error, setError] = useState<string>(""); // Hata mesajı için state
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Arama çubuğu için state
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // Önizleme kontrolü için state
   const modalRef = useRef<HTMLDivElement>(null);
 
   const apiUrl = import.meta.env.VITE_BE_URL;
@@ -24,7 +31,10 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
     const fetchMediaList = async () => {
       try {
         const response = await axios.get(`${apiUrl}/media/list`);
-        const mediaNames = response.data.map((media: any) => media.Key);
+        const mediaNames = response.data.map((media: any) => ({
+          key: media.Key,
+          launchName: media.launchName || "", // Lansman adı yoksa boş bırakılıyor
+        }));
         setMediaList(mediaNames);
       } catch (error) {
         console.error("Medya listesi alınamadı:", error);
@@ -106,11 +116,29 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
     setIsModalOpen(false);
   };
 
+  // Filtreleme işlemi
+  const filteredMediaList = mediaList.filter(
+    (mediaItem) =>
+      mediaItem.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mediaItem.launchName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Karakter sınırı kontrolü
+  const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value;
+    if (newText.length <= 325) {
+      setError(""); // Hata mesajını temizliyoruz
+      onTextChange(e);
+    } else {
+      setError("Karakter sınırını aştınız!"); // Hata mesajı
+    }
+    setCharCount(newText.length > 325 ? 325 : newText.length); // Karakter sayacını 325'e sınırlıyoruz
+  };
+
   return (
     <div className="flex flex-col space-y-6 p-4">
+      {/* Yazı alanı */}
       <div className="flex flex-col" style={{ marginLeft: "3%" }}>
-        {" "}
-        {/* Soldan %3 boşluk */}
         <label
           className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1"
           style={{ width: "413px", height: "16px", lineHeight: "15.62px" }}
@@ -118,8 +146,8 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
           Yazı
         </label>
         <textarea
-          value={text}
-          onChange={onTextChange}
+          value={text.slice(0, 325)}
+          onChange={handleTextChange}
           placeholder="Yazı Alanı"
           className="block w-full text-gray-900 bg-white border border-gray-300 sm:text-sm"
           rows={4}
@@ -132,11 +160,14 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
             outline: "none",
           }}
         />
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+        <div className="text-right text-sm text-gray-500 mt-1">
+          {charCount}/325
+        </div>
       </div>
 
+      {/* Medya alanı */}
       <div className="flex flex-col" style={{ marginLeft: "3%" }}>
-        {" "}
-        {/* Soldan %3 boşluk */}
         <label
           className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1"
           style={{ width: "413px", height: "16px", lineHeight: "15.62px" }}
@@ -157,8 +188,29 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
             outline: "none",
           }}
         />
+        {/* Yıldız işaretli medya ölçüsü ekleniyor */}
+        <p style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}>
+          <span style={{ color: "red" }}>*</span>500x600(px)
+        </p>
       </div>
 
+      {/* Önizleme Butonu */}
+      <div className="w-full mt-4">
+        <button
+          type="button"
+          className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+          style={{
+            width: "100px",
+            textAlign: "center",
+            marginLeft: "3%", // Buton soldan %3 uzaklıkta
+          }}
+          onClick={() => setIsPreviewOpen(!isPreviewOpen)}
+        >
+          Önizleme
+        </button>
+      </div>
+
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
           <div
@@ -173,15 +225,28 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
+            <input
+              type="text"
+              placeholder="Medya adına veya lansman adına göre arama"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700 mb-4"
+              style={{ width: "300px", height: "40px" }}
+            />
             <div className="grid grid-cols-4 gap-4">
-              {mediaList.map((mediaItem, index) => (
+              {filteredMediaList.map((mediaItem, index) => (
                 <div
                   key={index}
-                  onClick={() => handleMediaSelect(mediaItem)}
+                  onClick={() => handleMediaSelect(mediaItem.key)}
                   className="cursor-pointer"
                 >
-                  {renderFilePreview(mediaItem)}
-                  <p className="text-center text-sm truncate">{mediaItem}</p>
+                  {renderFilePreview(mediaItem.key)}
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.key}
+                  </p>
+                  <p className="text-center text-sm truncate">
+                    {mediaItem.launchName}
+                  </p>
                 </div>
               ))}
             </div>
@@ -193,6 +258,23 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
               Kapat
             </button>
           </div>
+        </div>
+      )}
+
+      {/* RightTextCardSection'ın %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçült
+            margin: "0 auto", // Ortalamak için
+            width: "100%", // Orijinal genişliğin yarısı
+            height: "300px",
+            marginLeft: "10%",
+          }}
+          className="p-2 rounded-lg mt-6"
+        >
+          <RightTextCardSection text={text} media={media} />
         </div>
       )}
     </div>

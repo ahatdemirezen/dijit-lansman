@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import LargeTopTitleHeroCardSection from "../sections/largeTopTitleHeroCard-section";
 
 interface LargeTopTitleHeroCardFormProps {
   title: string;
@@ -26,10 +27,11 @@ const LargeTopTitleHeroCardForm: React.FC<LargeTopTitleHeroCardFormProps> = ({
   onButtonTextChange,
   onButtonUrlChange,
   onMediaChange,
-  onFormSubmit,
 }) => {
   const [mediaList, setMediaList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Arama çubuğu için state
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // Önizleme state'i
   const modalRef = useRef<HTMLDivElement>(null);
 
   const apiUrl = import.meta.env.VITE_BE_URL;
@@ -120,16 +122,10 @@ const LargeTopTitleHeroCardForm: React.FC<LargeTopTitleHeroCardFormProps> = ({
     setIsModalOpen(false);
   };
 
-  const handleSubmit = () => {
-    const formData = {
-      title,
-      subTitle,
-      buttonText,
-      buttonUrl,
-      media,
-    };
-    onFormSubmit(formData);
-  };
+  // Medya dosyalarını arama terimine göre filtreleme
+  const filteredMediaList = mediaList.filter((mediaItem) =>
+    mediaItem.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col space-y-6 p-4">
@@ -245,7 +241,56 @@ const LargeTopTitleHeroCardForm: React.FC<LargeTopTitleHeroCardFormProps> = ({
             marginLeft: "3%", // Input alanını da soldan %3 kaydırıyoruz
           }}
         />
+        <p
+          style={{
+            color: "#667085",
+            fontSize: "12px",
+            marginTop: "4px",
+            marginLeft: "3%",
+          }}
+        >
+          <span style={{ color: "red" }}>*</span>1050x650(px)
+        </p>
       </div>
+
+      {/* Önizleme Butonu */}
+      <div className="w-full mt-4">
+        <button
+          type="button"
+          className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+          style={{
+            width: "100px",
+            textAlign: "center",
+            marginLeft: "3%",
+          }}
+          onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme açılır/kapanır
+        >
+          Önizleme
+        </button>
+      </div>
+
+      {/* Section'un %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          style={{
+            transform: "scale(0.5)", // %50 küçültme
+            transformOrigin: "top left", // Sol üstten küçült
+            margin: "0 auto",
+            width: "100%",
+            height: "320px",
+            marginLeft: "8%",
+          }}
+          className="p-2 rounded-lg mt-6"
+        >
+          <LargeTopTitleHeroCardSection
+            title={title}
+            subTitle={subTitle}
+            buttonText={buttonText}
+            buttonUrl={buttonUrl}
+            media={media}
+          />
+        </div>
+      )}
 
       {/* Modal */}
       {isModalOpen && (
@@ -262,8 +307,25 @@ const LargeTopTitleHeroCardForm: React.FC<LargeTopTitleHeroCardFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
+
+            {/* Arama Çubuğu Eklendi */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Medya adına göre ara"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700"
+                style={{
+                  width: "300px",
+                  height: "40px",
+                  boxShadow: "0 0 3px rgba(0, 0, 0, 0.1)",
+                }}
+              />
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
-              {mediaList.map((mediaItem, index) => (
+              {filteredMediaList.map((mediaItem, index) => (
                 <div
                   key={index}
                   onClick={() => handleMediaSelect(mediaItem)}

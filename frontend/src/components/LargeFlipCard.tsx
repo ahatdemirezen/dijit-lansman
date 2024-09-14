@@ -1,5 +1,6 @@
-import React, { useState, useEffect, ChangeEvent, useRef } from "react"; // useRef eklendi
+import React, { useState, useEffect, ChangeEvent, useRef } from "react";
 import axios from "axios";
+import LargeFlipCardSection from "../sections/largeFlipCard-section"; // Import the flip card section
 
 interface LargeFlipCardFormProps {
   frontMedia: string;
@@ -16,9 +17,11 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
 }) => {
   const [mediaList, setMediaList] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Arama çubuğu için state
   const [selectedMediaType, setSelectedMediaType] = useState<
     "front" | "back" | null
   >(null); // Ön ve arka medya tipi için state
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false); // State for preview toggle
   const modalRef = useRef<HTMLDivElement>(null); // useRef eklendi
 
   const apiUrl = import.meta.env.VITE_BE_URL;
@@ -37,7 +40,6 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
     fetchMediaList();
   }, []);
 
-  // Modal dışında tıklanırsa kapatmayı sağlayan fonksiyon
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -59,13 +61,11 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
     };
   }, [isModalOpen]);
 
-  // renderFilePreview fonksiyonu
   const renderFilePreview = (file: string) => {
     const fileType = file.split(".").pop()?.toLowerCase();
     const previewStyle = "w-full h-32 object-cover mb-2";
 
     switch (fileType) {
-      // Yaygın resim formatları
       case "jpg":
       case "jpeg":
       case "png":
@@ -81,8 +81,6 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
             className={previewStyle}
           />
         );
-
-      // Yaygın video formatları
       case "mp4":
       case "webm":
       case "ogg":
@@ -98,7 +96,6 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
             Tarayıcınız bu videoyu oynatmayı desteklemiyor.
           </video>
         );
-
       default:
         return (
           <p className="text-center">
@@ -108,7 +105,10 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
     }
   };
 
-  // Medya seçimi yapıldıktan sonra media state'ini güncelleyen fonksiyon
+  const filteredMediaList = mediaList.filter((mediaItem) =>
+    mediaItem.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleMediaSelect = (selectedMedia: string) => {
     if (selectedMediaType === "front") {
       onFrontMediaChange({
@@ -126,10 +126,7 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
     <div className="flex flex-col space-y-6 p-4">
       {/* Ön Medya Alanı */}
       <div className="flex flex-col" style={{ marginLeft: "3%" }}>
-        <label
-          className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1"
-          style={{ width: "413px", height: "16px", lineHeight: "15.62px" }}
-        >
+        <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
           Ön Medya Alanı
         </label>
         <input
@@ -143,20 +140,20 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
           className="block border border-[#D0D5DD] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#667085] text-[16px] leading-[24px]"
           style={{ width: "423px", height: "50px" }}
         />
+        <p style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}>
+          <span style={{ color: "red" }}>*</span> max 960x630(px)
+        </p>
       </div>
 
       {/* Arka Medya Alanı */}
       <div className="flex flex-col" style={{ marginLeft: "3%" }}>
-        <label
-          className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1"
-          style={{ width: "413px", height: "16px", lineHeight: "15.62px" }}
-        >
+        <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
           Arka Medya Alanı
         </label>
         <input
           type="text"
           readOnly
-          value={backMedia || "  Medya Seç"} // Başlangıçta "Medya Seç" yazısı olacak
+          value={backMedia || "  Medya Seç"}
           onClick={() => {
             setIsModalOpen(true);
             setSelectedMediaType("back");
@@ -164,14 +161,25 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
           className="block border border-[#D0D5DD] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-[#667085] text-[16px] leading-[24px]"
           style={{ width: "423px", height: "50px" }}
         />
+        <p style={{ color: "#667085", fontSize: "12px", marginTop: "4px" }}>
+          <span style={{ color: "red" }}>*</span> max 960x630(px)
+        </p>
       </div>
 
-      {/* Arka Medya Önizleme */}
-      <div className="flex justify-start mb-4">
-        {backMedia && renderFilePreview(backMedia)}
-      </div>
+      <button
+        type="button"
+        className="bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
+        style={{
+          width: "100px", // Önizleme butonunun genişliği
+          marginLeft: "3%", // Buton soldan %3 uzaklıkta
+          textAlign: "center", // Önizleme yazısını ortaladık
+        }}
+        onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme butonu
+      >
+        Önizleme
+      </button>
 
-      {/* Modal */}
+      {/* Medya Modalı */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
           <div
@@ -186,8 +194,25 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
               X
             </button>
             <h3 className="text-lg font-semibold mb-4">Medya Seç</h3>
+
+            {/* Arama çubuğu */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Medya adına göre ara"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700"
+                style={{
+                  width: "300px",
+                  height: "40px",
+                  boxShadow: "0 0 3px rgba(0, 0, 0, 0.1)",
+                }}
+              />
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
-              {mediaList.map((mediaItem, index) => (
+              {filteredMediaList.map((mediaItem, index) => (
                 <div
                   key={index}
                   onClick={() => handleMediaSelect(mediaItem)}
@@ -198,6 +223,7 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
                 </div>
               ))}
             </div>
+
             <button
               type="button"
               className="mt-4 w-full bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"
@@ -206,6 +232,22 @@ const LargeFlipCardForm: React.FC<LargeFlipCardFormProps> = ({
               Kapat
             </button>
           </div>
+        </div>
+      )}
+
+      {/* LargeFlipCardSection'ın %50 küçültülmüş önizleme alanı */}
+      {isPreviewOpen && (
+        <div
+          className="p-2 rounded-lg mt-2" // "p-2" ve "mt-2" ile boşluklar küçültüldü
+          style={{
+            transform: "scale(0.5)", // Scale down to 50%
+            transformOrigin: "top left", // Anchor scaling from top left
+            margin: "0 auto", // Center the preview
+            height: "290px",
+            marginLeft: "10%",
+          }}
+        >
+          <LargeFlipCardSection frontMedia={frontMedia} backMedia={backMedia} />
         </div>
       )}
     </div>

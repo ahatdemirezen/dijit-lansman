@@ -12,9 +12,9 @@ export type Components = {
   frontMedia?: string;
   backMedia?: string;
   text?: string;
-  subTitle?: string;
   buttonText?: string;
   buttonUrl?: string;
+  subTitle?: string;
   rightMedia?: string;
   leftMedia?: string;
   rightFrontMedia?: string;
@@ -27,6 +27,7 @@ export type Components = {
   rightButtonUrl?: string;
   leftTitle?: string;
   leftSubTitle?: string;
+  spacer?: boolean;
   leftButtonText?: string;
   leftButtonUrl?: string;
   miniCardItems?: Array<{
@@ -35,6 +36,14 @@ export type Components = {
     logoMedia: string;
     buttonUrl?: string; // Yeni eklenen alan
     backgroundMedia?: string; // Yeni eklenen alan
+  }>;
+  reelsBottomCardItems?: Array<{
+    id: number;
+    media: string;
+    title: string;
+    subTitle: string;
+    buttonText: string;
+    buttonUrl: string;
   }>;
   accordianItems?: Array<{ title: string; subTitle: string }>;
   infoCardSliderItems?: Array<{
@@ -58,7 +67,7 @@ export type Components = {
     text: string;
     media: string;
   };
-  searchQuery?: string; // Yeni eklenen alan
+  searchQuery?: string;
 };
 
 export type DeployDesign = {
@@ -72,8 +81,10 @@ export type DeployDesign = {
   searchQuery?: string;
 };
 
-interface DeployDesignStore {
+export interface DeployDesignStore {
   deployDesign: DeployDesign[];
+  launch: any;
+  components: any;
   loading: boolean;
   error: string | null;
   fetchDeployDesign: (launchId: string) => Promise<void>;
@@ -89,11 +100,12 @@ interface DeployDesignStore {
     id: string,
     newSequenceNumber: number
   ) => Promise<void>;
+  fetchLaunch: (launchUrl: string) => Promise<void>;
   updatePreviewStatus: (launchId: string, preview: boolean) => Promise<void>;
   clearDeployDesign: () => void;
 }
 
-const apiUrl = import.meta.env.VITE_BE_URL;
+const apiUrl = import.meta.env.VITE_BE_URL || '';
 
 const fetchDeployDesign = async (
   set: (state: Partial<DeployDesignStore>) => void,
@@ -105,6 +117,26 @@ const fetchDeployDesign = async (
     console.log("API Response:", response.data);
     set({
       deployDesign: response.data,
+      loading: false,
+    });
+  } catch (error: any) {
+    set({ error: error.response?.data || "An error occurred", loading: false });
+  }
+};
+
+const fetchLaunch = async (
+  set: (state: Partial<DeployDesignStore>) => void,
+  launchUrl: string
+): Promise<void> => {
+  set({ loading: true, error: null });
+  try {
+    const response = await axios.get(
+      `${apiUrl}/launch/by-launch-url/${launchUrl}`
+    );
+    console.log("Launch API Response:", response.data);
+    set({
+      launch: response.data.launch,
+      components: response.data.components,
       loading: false,
     });
   } catch (error: any) {
@@ -190,7 +222,6 @@ const deleteDeployDesign = async (
   }
 };
 
-// Yeni eklenen sıralama güncelleme fonksiyonu
 const updateDeployDesignSequence = async (
   set: (state: Partial<DeployDesignStore>) => void,
   launchId: string,
@@ -215,8 +246,10 @@ const clearDeployDesign = (
   set({ deployDesign: [] });
 };
 
-const initialState: any = {
-  deployDesign: null,
+const initialState = {
+  deployDesign: [] as DeployDesign[], // Array olacağı için boş array olarak başlatıldı
+  launch: {} as any, // Launch veri yapısının tipine göre güncellenmeli
+  components: {} as any, // Components veri yapısının tipine göre güncellenmeli
   loading: false,
   error: null,
 };
@@ -230,6 +263,7 @@ const useDeployDesignStore = create<DeployDesignStore>((set) => ({
     updateInTrailerStatus(set, launchId, id, inTrailer),
   updatePreviewStatus: (launchId: string, preview: boolean) =>
     updatePreviewStatus(set, launchId, preview),
+  fetchLaunch: (launchUrl: string) => fetchLaunch(set, launchUrl),
   deleteDeployDesign: (launchId: string, id: string) =>
     deleteDeployDesign(set, launchId, id),
   updateDeployDesignSequence: (

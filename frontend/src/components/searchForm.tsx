@@ -1,7 +1,7 @@
 import React from "react";
 import {
   FaCalendarAlt,
-  FaEnvelope,
+  FaPlayCircle,
   FaClock,
   FaSyncAlt,
   FaSearch,
@@ -20,9 +20,19 @@ const SearchForm: React.FC<SearchFormProps> = ({
 }) => {
   return (
     <div className="p-6 bg-gray-100 min-h-screen flex flex-col items-center justify-start">
-      <h1 className="text-2xl font-bold text-[#5F2EEA] mb-6 text-center">
-        Lansman Arama
-      </h1>
+      {/* Arama Çubuğu */}
+      <div className="relative w-full max-w-xl mb-6">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={onSearchChange}
+          placeholder="Arama"
+          className="w-full border border-gray-300 p-4 rounded-lg pl-10 bg-gray-50"
+        />
+        <div className="absolute inset-y-0 left-3 flex items-center">
+          <FaSearch className="text-gray-400" />
+        </div>
+      </div>
 
       {/* Filtre Kartları */}
       <div className="grid grid-cols-4 gap-4 mb-6">
@@ -33,7 +43,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
           </p>
         </div>
         <div className="bg-gray-200 p-4 rounded-lg text-center shadow-md cursor-pointer">
-          <FaEnvelope className="text-3xl mb-2 text-gray-600 mx-auto" />
+          <FaPlayCircle className="text-3xl mb-2 text-gray-600 mx-auto" />
           <p className="font-semibold text-sm text-gray-800">
             Devam Eden Lansmanlar
           </p>
@@ -61,20 +71,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <FaSyncAlt className="text-lg text-gray-600" />
           <span>Temizle</span>
         </button>
-      </div>
-
-      {/* Arama Çubuğu */}
-      <div className="relative w-full max-w-xl">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={onSearchChange}
-          placeholder="Arama"
-          className="w-full border border-gray-300 p-4 rounded-lg pl-10 bg-gray-50"
-        />
-        <div className="absolute inset-y-0 left-3 flex items-center">
-          <FaSearch className="text-gray-400" />
-        </div>
       </div>
     </div>
   );

@@ -58,19 +58,21 @@ const AccordionRightCardSection: React.FC<AccordionRightCardSectionProps> = ({
       <div
         ref={ref}
         style={{
-          margin: "40px 0",
           ...animationStyle,
           ...(inView ? visibleStyle : {}),
         }}
         className="flex bg-[#fafafa] rounded-[20px] shadow-lg h-[787px] w-[1400px] mx-auto"
       >
         {/* Sol kısım - Accordion */}
-        <div className="w-[45%] h-full flex flex-col items-start justify-center mr-16 overflow-y-auto">
+        <div
+          className="w-[45%] h-full flex flex-col items-start justify-center mr-16 overflow-hidden" // Değişiklik burada
+          style={{ maxHeight: "787px", overflowY: "hidden" }} // Scroll'u gizledik
+        >
           {accordian.map((item, index) => (
             <div key={index} className="w-full">
               <div
                 onClick={() => toggleAccordion(index)}
-                className="mb-8 cursor-pointer w-full bg-transparent border-b border-gray-300"
+                className="mb-4 cursor-pointer w-full bg-transparent border-b border-gray-300"
                 style={{ paddingLeft: "15px" }}
               >
                 <h3 className="text-[24px] font-semibold flex justify-between items-center text-gray-900">
@@ -88,7 +90,7 @@ const AccordionRightCardSection: React.FC<AccordionRightCardSectionProps> = ({
                   maxHeight:
                     openIndex === index ? `${heights[index]}px` : "0px",
                   transition: "max-height 0.5s ease",
-                  overflow: "hidden",
+                  overflow: "hidden", // Accordion için taşmayı gizle
                   paddingLeft: "5px",
                 }}
                 className="mt-2 mb-8 text-[17px] text-gray-600 leading-relaxed break-words whitespace-normal"
