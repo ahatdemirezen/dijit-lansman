@@ -1,6 +1,6 @@
 import { Schema, model, InferSchemaType, Types } from "mongoose";
 
-const seoSettingsSchema = new Schema(
+export const seoSettingsSchema = new Schema(
   {
     launchId: {
       type: Types.ObjectId,
@@ -34,6 +34,6 @@ const seoSettingsSchema = new Schema(
   { timestamps: true }
 );
 
-type SeoSettingsModel = InferSchemaType<typeof seoSettingsSchema>;
+export type SeoSettingsModel = InferSchemaType<typeof seoSettingsSchema>;
 
 export default model<SeoSettingsModel>("SeoSettings", seoSettingsSchema);

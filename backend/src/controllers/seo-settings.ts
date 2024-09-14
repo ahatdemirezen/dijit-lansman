@@ -134,3 +134,17 @@ export const updateSeoSettings: RequestHandler<
     next(error);
   }
 };
+
+export const getAllSeoSettings: RequestHandler = async (req, res, next) => {
+  try {
+    const allSeoSettings = await seoSettingsModel.find();
+
+    if (!allSeoSettings || allSeoSettings.length === 0) {
+      return res.status(404).json({ message: "No SEO settings found" });
+    }
+
+    res.status(200).json(allSeoSettings);
+  } catch (error) {
+    next(error);
+  }
+};

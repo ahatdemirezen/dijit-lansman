@@ -3,7 +3,7 @@ import addLaunchModel from "../models/Launch";
 import mongoose from "mongoose";
 import createHttpError from "http-errors";
 import { getAddLaunch } from "../services/add-launch-service";
-import seoSettingsModel from "../models/seoSettings";
+import seoSettingsModel, { SeoSettingsModel } from "../models/seoSettings";
 import deployDesign from "../models/deployDesign";
 
 import {
@@ -42,6 +42,23 @@ export const getAddLaunchById: RequestHandler<GetLaunchParams> = async (
     }
 
     res.status(200).json(addLaunch);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getLaunchByLaunchUrl: RequestHandler = async (req, res, next) => {
+  const { launchUrl } = req.params;
+  try {
+    const seo: any = await seoSettingsModel
+      .find({ launchUrl: launchUrl })
+      .exec();
+    const launchId: string = seo[0]?.launchId;
+    const components: any = await deployDesign
+      .find({ launchId: launchId })
+      .exec();
+    const launch = await addLaunchModel.findById(launchId).exec();
+    return res.status(200).json({ launch, components });
   } catch (error) {
     next(error);
   }
@@ -127,7 +144,7 @@ export const deleteAddLaunch: RequestHandler = async (req, res, next) => {
       throw createHttpError(404, "Launch not found");
     }
 
-    await seoSettingsModel.deleteMany({ launchId }); 
+    await seoSettingsModel.deleteMany({ launchId });
     await deployDesign.deleteMany({ launchId });
 
     res

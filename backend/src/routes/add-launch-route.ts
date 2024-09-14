@@ -14,4 +14,6 @@ router.patch("/:launchId", AddLaunchController.updateAddLaunch);
 
 router.delete("/:launchId", AddLaunchController.deleteAddLaunch);
 
+router.get("/by-launch-url/:launchUrl", AddLaunchController.getLaunchByLaunchUrl);
+
 export default router;

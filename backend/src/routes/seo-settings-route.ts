@@ -11,4 +11,6 @@ router.get("/:launchId", SeoSettingsController.getSeoSettingsByLaunchId);
 // Belirli bir launchId'ye göre SEO ayarlarını güncelleme
 router.patch("/:launchId/:seoId", SeoSettingsController.updateSeoSettings);
 
+router.get("/", SeoSettingsController.getAllSeoSettings);
+
 export default router;

@@ -35,15 +35,14 @@ export const listAllMedia: RequestHandler = async (req, res, next) => {
 };
 
 // Medya yükleme
-// Backend'deki createMedia fonksiyonu
 export const createMedia: RequestHandler = async (req, res, next) => {
-  const { mediaName, companyName } = req.body; // Firma adı ve medya adı alınıyor
+  const { mediaName, launchName } = req.body; // Lansman adı ve medya adı alınıyor
   const mediaUploadOrLink = req.file; // Yüklenen dosya
 
-  if (!mediaUploadOrLink || !mediaName || !companyName) {
+  if (!mediaUploadOrLink || !mediaName || !launchName) {
     return res
       .status(400)
-      .json({ message: "Medya adı ve firma adı zorunludur." });
+      .json({ message: "Medya adı ve lansman adı zorunludur." });
   }
 
   const key = `${mediaName}`;
@@ -56,7 +55,7 @@ export const createMedia: RequestHandler = async (req, res, next) => {
       Body: mediaUploadOrLink.buffer, // Dosya içeriği burada belirleniyor
       ContentType: contentType, // İçerik türü belirleniyor
       Metadata: {
-        companyName, // Firma adı metadata olarak ekleniyor
+        launchName, // Lansman adı metadata olarak ekleniyor
       },
     };
 
