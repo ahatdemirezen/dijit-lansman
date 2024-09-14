@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, CSSProperties } from "react";
 import dayjs from "dayjs";
 import {
   FaCalendarAlt,
@@ -26,79 +26,122 @@ const SearchSection: React.FC<SearchComponentSectionProps> = ({
   loading,
   onButtonClick,
 }) => {
+  const cardStyle: CSSProperties = {
+    width: "100%", // Kartları geniş grid sistemine yaymak için %100 genişlik
+    height: "250px",
+    transition: "transform 1.0s ease, box-shadow 1.0s ease",
+    cursor: "pointer",
+  };
+
+  const hoverStyle: CSSProperties = {
+    transform: "scale(1.05)", // Kartların hafifçe büyümesi için scale kullanıyoruz
+    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)", // Hafif bir gölge ekleniyor
+  };
+
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  const searchBoxStyle: CSSProperties = {
+    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)", // Lansman kartlarıyla aynı gölge
+    borderRadius: "8px",
+  };
+
   return (
     <div className="p-6 bg-white flex flex-col items-center justify-start w-full">
-      {/* Arama Kutusu */}
-      <div className="relative w-full max-w-4xl mb-6">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchQueryChange(e.target.value)}
-          placeholder="Arama yapın..."
-          className="w-full border border-gray-300 p-5 rounded-lg pl-12 bg-gray-50 focus:ring-2 focus:ring-indigo-500"
-          disabled={loading}
-        />
-        <div className="absolute inset-y-0 left-3 flex items-center">
-          <FaSearch className="text-gray-400" />
-        </div>
-      </div>
-
-      {/* Lansman Butonları */}
-      <div className="grid grid-cols-4 gap-8 w-full max-w-5xl mb-6">
+      {/* Lansman Butonları ve Arama Kutusu */}
+      <div className="grid grid-cols-4 gap-8 w-full max-w-6xl mb-6">
+        {/* Lansman Butonları */}
         <button
           type="button"
-          className="bg-gray-200 p-8 rounded-lg text-center shadow-md cursor-pointer w-full"
+          className="bg-gray-100 rounded-lg text-center shadow-md cursor-pointer"
           onClick={() => onButtonClick("todayLaunches")}
           disabled={loading}
+          style={{
+            ...cardStyle,
+            ...(hovered === 1 ? hoverStyle : {}),
+          }}
+          onMouseEnter={() => setHovered(1)}
+          onMouseLeave={() => setHovered(null)}
         >
-          <FaCalendarAlt className="text-3xl mb-2 text-gray-600 mx-auto" />
-          <span className="font-semibold text-md text-gray-800">
+          <FaCalendarAlt className="text-3xl mb-2 text-gray-500 mx-auto" />
+          <span className="font-semibold text-md text-gray-500">
             Bugünün Lansmanları
           </span>
         </button>
 
         <button
           type="button"
-          className="bg-gray-200 p-8 rounded-lg text-center shadow-md cursor-pointer w-full"
+          className="bg-gray-100 rounded-lg text-center shadow-md cursor-pointer"
           onClick={() => onButtonClick("ongoing")}
           disabled={loading}
+          style={{
+            ...cardStyle,
+            ...(hovered === 2 ? hoverStyle : {}),
+          }}
+          onMouseEnter={() => setHovered(2)}
+          onMouseLeave={() => setHovered(null)}
         >
-          <FaPlayCircle className="text-3xl mb-2 text-gray-600 mx-auto" />
-          <span className="font-semibold text-md text-gray-800">
+          <FaPlayCircle className="text-3xl mb-2 text-gray-500 mx-auto" />
+          <span className="font-semibold text-md text-gray-500">
             Devam Eden Lansmanlar
           </span>
         </button>
 
         <button
           type="button"
-          className="bg-gray-200 p-8 rounded-lg text-center shadow-md cursor-pointer w-full"
+          className="bg-gray-100 rounded-lg text-center shadow-md cursor-pointer"
           onClick={() => onButtonClick("upcoming")}
           disabled={loading}
+          style={{
+            ...cardStyle,
+            ...(hovered === 3 ? hoverStyle : {}),
+          }}
+          onMouseEnter={() => setHovered(3)}
+          onMouseLeave={() => setHovered(null)}
         >
-          <FaClock className="text-3xl mb-2 text-gray-600 mx-auto" />
-          <span className="font-semibold text-md text-gray-800">
+          <FaClock className="text-3xl mb-2 text-gray-500 mx-auto" />
+          <span className="font-semibold text-md text-gray-500">
             Gelecek Lansmanlar
           </span>
         </button>
 
         <button
           type="button"
-          className="bg-gray-200 p-8 rounded-lg text-center shadow-md cursor-pointer w-full"
+          className="bg-gray-100 rounded-lg text-center shadow-md cursor-pointer"
           onClick={() => onButtonClick("past")}
           disabled={loading}
+          style={{
+            ...cardStyle,
+            ...(hovered === 4 ? hoverStyle : {}),
+          }}
+          onMouseEnter={() => setHovered(4)}
+          onMouseLeave={() => setHovered(null)}
         >
-          <FaSyncAlt className="text-3xl mb-2 text-gray-600 mx-auto" />
-          <span className="font-semibold text-md text-gray-800">
+          <FaSyncAlt className="text-3xl mb-2 text-gray-500 mx-auto" />
+          <span className="font-semibold text-md text-gray-500">
             Geçmiş Lansmanlar
           </span>
         </button>
+
+        {/* Arama Kutusu - Tüm kolonlara yayılıyor */}
+        <div className="col-span-4">
+          <div className="relative w-full" style={searchBoxStyle}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.target.value)}
+              placeholder="Arama yapın..."
+              className="w-full border border-gray-300 p-5 rounded-lg pl-12 bg-gray-50 focus:ring-2 focus:ring-gray-100"
+              disabled={loading}
+            />
+            <div className="absolute inset-y-0 left-3 flex items-center">
+              <FaSearch className="text-gray-400" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Yükleniyor durumu */}
       {loading && (
-        <p className="mt-4 text-center text-lg text-indigo-600">
-          Yükleniyor...
-        </p>
+        <p className="mt-4 text-center text-lg text-gray-600">Yükleniyor...</p>
       )}
     </div>
   );
@@ -200,18 +243,18 @@ const LaunchFilter: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="w-full max-w-5xl">
+      <div className="w-full max-w-9xl">
         <SearchSection
           searchQuery={searchQuery}
           onSearchQueryChange={handleSearchQueryChange}
           loading={loading}
           onButtonClick={handleButtonClick}
-          onFocus={() => setHasInteracted(true)} // onFocus fonksiyonunu burada kullanın
+          onFocus={() => setHasInteracted(true)}
         />
       </div>
 
       {hasInteracted && (
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-12 w-full max-w-5xl">
           {filteredLaunches.length > 0 ? (
             filteredLaunches.map((launch) => {
               const seoData = getSeoForLaunch(launch._id);
@@ -219,7 +262,7 @@ const LaunchFilter: React.FC = () => {
               return (
                 <div
                   key={launch._id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105 duration-300 h-full w-full"
+                  className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105 duration-300 col-span-1"
                 >
                   {seoData ? (
                     <div className="flex flex-col h-full">
