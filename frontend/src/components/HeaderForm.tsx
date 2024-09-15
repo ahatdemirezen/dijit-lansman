@@ -233,6 +233,7 @@ const HeaderForm: React.FC<HeaderFormProps> = ({
           style={{
             width: "750px", // Arka plan genişliği
             height: "100px", // Arka plan yüksekliğini 100px yaptım
+            marginLeft: "17%",
           }}
         >
           <div

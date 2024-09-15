@@ -114,8 +114,8 @@ const BannerForm: React.FC<BannerFormProps> = ({
   };
 
   return (
-    <div className="flex flex-col space-y-6 p-4">
-      <div className="flex flex-col">
+    <div className="flex flex-col space-y-6 p-4 ">
+      <div className="flex flex-col" style={{ paddingLeft: "3%" }}>
         <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
           Buton
         </label>
@@ -129,7 +129,7 @@ const BannerForm: React.FC<BannerFormProps> = ({
         />
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col" style={{ paddingLeft: "3%" }}>
         <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
           Buton Url
         </label>
@@ -143,7 +143,7 @@ const BannerForm: React.FC<BannerFormProps> = ({
         />
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col" style={{ paddingLeft: "3%" }}>
         <label className="block text-[#2B3674] font-[DM Sans] text-[12px] font-normal mb-1">
           Medya
         </label>
@@ -219,7 +219,7 @@ const BannerForm: React.FC<BannerFormProps> = ({
             transformOrigin: "top left", // Sol üstten küçültme
             width: "635px",
             height: "150px",
-            marginLeft: "25%",
+            marginLeft: "35%",
           }}
           className="p-2 rounded-lg"
         >

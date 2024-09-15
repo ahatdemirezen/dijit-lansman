@@ -390,7 +390,10 @@ const FullScreenCardSliderForm: React.FC<FullScreenCardSliderFormProps> = ({
         </div>
       )}
       {/* Önizleme Butonu - Sol tarafa hizalanmış */}
-      <div className="w-full mt-4 flex justify-start">
+      <div
+        className="w-full mt-4 flex justify-start"
+        style={{ marginLeft: "1.5%" }}
+      >
         <button
           type="button"
           className="ml-10 bg-[#970928] text-white py-2 px-4 rounded-md hover:bg-[#7a0620] transition transform duration-150 ease-in-out"

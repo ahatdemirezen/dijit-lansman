@@ -161,7 +161,10 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
           }}
         />
         {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-        <div className="text-right text-sm text-gray-500 mt-1">
+        <div
+          className="text-right text-sm text-gray-500 mt-1"
+          style={{ marginRight: "61.7%" }}
+        >
           {charCount}/325
         </div>
       </div>
@@ -270,7 +273,7 @@ const RightTextCardForm: React.FC<RightTextCardFormProps> = ({
             margin: "0 auto", // Ortalamak için
             width: "100%", // Orijinal genişliğin yarısı
             height: "300px",
-            marginLeft: "10%",
+            marginLeft: "25%",
           }}
           className="p-2 rounded-lg mt-6"
         >

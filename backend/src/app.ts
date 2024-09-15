@@ -5,6 +5,7 @@ import seoSettings from "./routes/seo-settings-route";
 import media from "./routes/media-route";
 import deployDesign from "./routes/deploy-design-route";
 import loginRoute from "./routes/login-route";
+import hompageroute from "./routes/homepage-route";
 import morgan from "morgan";
 import mongoose from "mongoose";
 import { isHttpError } from "http-errors";
@@ -42,6 +43,7 @@ app.use("/api/media", media);
 app.use("/api/seoSettings", seoSettings);
 app.use("/api/deployDesign", deployDesign);
 app.use("/api/login", loginRoute);
+app.use('/api', hompageroute); 
 
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   console.error(error);

@@ -1,3 +1,5 @@
+import React, { useEffect } from "react";
+import useHomePageStore from "../zustands/usehomepageStore";
 import CTASection from "../sections/cta-section";
 import LargeCardSection from "../sections/largeCard-section";
 import FullScreenCardSection from "../sections/fullScreenCard-section";
@@ -18,23 +20,64 @@ import TwinFlipCardSection from "../sections/twinFlipCard-section";
 import TwinTopTitleHeroCardSection from "../sections/twinTopTitleHeroCard-section";
 import LargePopupCardSection from "../sections/largePopupCard-section";
 import ReelsCardSliderSection from "../sections/reelsCardSlider-section";
-import LaunchFilter from "../sections/launchFilter";
-import SpaceSection from "../sections/SpaceSection";
-import ReelsBottomCardSection from "../sections/ReelsBottomCardSection";
 import BottomTextCardSection from "../sections/BottomTextCardSection";
+import SpaceSection from "../sections/SpaceSection";
 import BannerSection from "../sections/BannerSection";
+import ReelsBottomCardSection from "../sections/ReelsBottomCardSection";
+import LaunchFilter from "../sections/launchFilter";
 import NavBar from "../sections/NavBar";
 
-const LaunchPage: React.FC<any> = (components: any) => {
-  console.log("components", components);
+const HomePage: React.FC = () => {
+  const { homepageLaunch, components, getHomepageData } = useHomePageStore();
+
+  // Verileri çek
+  useEffect(() => {
+    getHomepageData();
+  }, [getHomepageData]);
+
+  if (!homepageLaunch) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="relative overflow-x-hidden">
       <NavBar />
+      <div
+        className="absolute top-0 right-0 p-5 flex items-center"
+        style={{ marginRight: "15%" }}
+      >
+        <div className="mr-5">
+          <button
+            style={{
+              backgroundColor: "#970928",
+              color: "white",
+              padding: "5px 10px",
+              marginRight: "px",
+              borderRadius: "5px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "0.875rem",
+            }}
+            onClick={() => (window.location.href = "/login")}
+          >
+            Login 'e Git
+          </button>
+          <p
+            style={{
+              color: "black",
+              marginTop: "5px",
+              textAlign: "right",
+              fontSize: "0.75rem", // Yazı boyutu küçültüldü
+            }}
+          >
+            Geçici olarak yapılmıştır.
+          </p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 max-w-full bg-white">
-        {components.components.map((component: any) => {
-          // Sadece inTrailer true olan component'leri göster
-          if (component.inTrailer) if (!component.content) return null;
+        {components.map((component: any) => {
+          if (!component.content) return null;
 
           if (component.type === "CTA Card") {
             return (
@@ -43,25 +86,6 @@ const LaunchPage: React.FC<any> = (components: any) => {
                 buttonText={component.content.buttonText || ""}
                 buttonUrl={component.content.buttonUrl || ""}
                 title={component.content.title || ""}
-              />
-            );
-          }
-          if (component.type === "Bottom Text Card") {
-            return (
-              <BottomTextCardSection
-                key={component._id}
-                text={component.content.text || ""}
-                media={component.content.media || ""}
-              />
-            );
-          }
-          if (component.type === "Banner Form") {
-            return (
-              <BannerSection
-                key={component._id}
-                buttonText={component.content.buttonText || ""}
-                buttonUrl={component.content.buttonUrl || ""}
-                media={component.content.media || ""}
               />
             );
           }
@@ -75,7 +99,13 @@ const LaunchPage: React.FC<any> = (components: any) => {
               />
             );
           }
-
+          if (component.type === "Search Form") {
+            return (
+              <div key={component._id}>
+                <LaunchFilter />
+              </div>
+            );
+          }
           if (component.type === "Full Screen Card Slider") {
             return (
               <FullScreenCardSection
@@ -85,14 +115,23 @@ const LaunchPage: React.FC<any> = (components: any) => {
             );
           }
 
+          if (component.type === "Bottom Text Card") {
+            return (
+              <BottomTextCardSection
+                key={component._id}
+                text={component.content.text || ""}
+                media={component.content.media || ""}
+              />
+            );
+          }
+
           if (component.type === "Header") {
             return (
-              <div key={component._id}>
-                <HeaderSection
-                  title={component.content.title || ""}
-                  logoMedia={component.content.logoMedia || ""}
-                />
-              </div>
+              <HeaderSection
+                key={component._id}
+                title={component.content.title || ""}
+                logoMedia={component.content.logoMedia || ""}
+              />
             );
           }
 
@@ -113,19 +152,24 @@ const LaunchPage: React.FC<any> = (components: any) => {
               />
             );
           }
-          if (component.type === "Search Form") {
-            return (
-              <div key={component._id}>
-                <LaunchFilter />
-              </div>
-            );
-          }
+
           if (component.type === "Large Top Title Hero Card") {
             return (
               <LargeTopTitleHeroCardSection
                 key={component._id}
                 title={component.content.title || ""}
                 subTitle={component.content.subTitle || ""}
+                buttonText={component.content.buttonText || ""}
+                buttonUrl={component.content.buttonUrl || ""}
+                media={component.content.media || ""}
+              />
+            );
+          }
+
+          if (component.type === "Banner Form") {
+            return (
+              <BannerSection
+                key={component._id}
                 buttonText={component.content.buttonText || ""}
                 buttonUrl={component.content.buttonUrl || ""}
                 media={component.content.media || ""}
@@ -267,9 +311,6 @@ const LaunchPage: React.FC<any> = (components: any) => {
               />
             );
           }
-          if (component.type === "Space") {
-            return <SpaceSection key={component._id} />;
-          }
 
           if (component.type === "Reels Bottom Card") {
             return (
@@ -280,6 +321,10 @@ const LaunchPage: React.FC<any> = (components: any) => {
             );
           }
 
+          if (component.type === "Space") {
+            return <SpaceSection key={component._id} />;
+          }
+
           return null;
         })}
       </div>
@@ -287,4 +332,4 @@ const LaunchPage: React.FC<any> = (components: any) => {
   );
 };
 
-export default LaunchPage;
+export default HomePage;

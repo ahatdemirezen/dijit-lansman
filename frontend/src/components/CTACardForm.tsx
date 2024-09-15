@@ -132,6 +132,7 @@ const CTACardForm: React.FC<CTACardFormProps> = ({
             margin: "0 auto", // Ortalamak için
             height: "60px",
             width: "100%", // Orijinal genişliğin yarısı
+            marginLeft: "17%",
           }}
           className="p-2 rounded-lg mt-6"
         >

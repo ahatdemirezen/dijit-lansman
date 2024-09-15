@@ -50,19 +50,22 @@ const FullTextForm: React.FC<FullTextFormProps> = ({ text, onTextChange }) => {
           }}
         />
         {/* Hata mesajı ve karakter sayacı */}
-        {error && (
-          <p
-            className="text-red-500 text-xs mt-1"
-            style={{ marginLeft: "20%" }}
+        <div style={{ marginTop: "4px" }}>
+          {error && (
+            <p
+              className="text-red-500 text-xs mt-1"
+              // marginLeft stilini kaldırdık
+            >
+              {error}
+            </p> // Hata mesajı yazı alanının hemen altında
+          )}
+          <div
+            style={{ marginRight: "61.7%" }}
+            className="text-right text-sm text-gray-500 mt-1"
+            // marginLeft stilini kaldırdık
           >
-            {error}
-          </p> // Hata mesajı soldan %20
-        )}
-        <div
-          className="text-right text-sm text-gray-500 mt-1"
-          style={{ marginLeft: "20%" }}
-        >
-          {charCount}/450 {/* Karakter sayacını gösteriyoruz */}
+            {charCount}/450 {/* Karakter sayacını gösteriyoruz */}
+          </div>
         </div>
       </div>
 

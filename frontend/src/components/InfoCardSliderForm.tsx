@@ -316,7 +316,7 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
           style={{
             width: "100px",
             textAlign: "center",
-            marginLeft: "3%",
+            marginLeft: "4.3%",
           }}
           onClick={() => setIsPreviewOpen(!isPreviewOpen)} // Önizleme butonuna basılınca açılıp kapanıyor
         >
@@ -333,7 +333,7 @@ const InfoCardSliderForm: React.FC<InfoCardSliderFormProps> = ({
             margin: "0 auto", // Ortalamak için
             width: "100%", // Orijinal genişliğin yarısı
             height: "150px",
-            marginLeft: "40%",
+            marginLeft: "25%",
           }}
           className="p-2 rounded-lg mt-6"
         >

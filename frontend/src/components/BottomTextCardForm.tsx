@@ -190,7 +190,7 @@ const BottomTextCardForm: React.FC<BottomTextCardFormProps> = ({
         )}
         <div
           className="text-right text-sm text-gray-500 mt-1"
-          style={{ marginLeft: "3%" }}
+          style={{ marginRight: "60%" }}
         >
           {charCount}/250
         </div>

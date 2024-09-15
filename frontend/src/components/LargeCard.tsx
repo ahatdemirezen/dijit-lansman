@@ -221,7 +221,7 @@ const LargeCardForm: React.FC<LargeCardFormProps> = ({
             margin: "0", // Otomatik margin kaldırıldı
             width: "525px", // Kart genişliğinin %50'si
             height: "325px", // Kart yüksekliğinin %50'si
-            marginLeft: "10%",
+            marginLeft: "25%",
           }}
           className="p-2 rounded-lg mt-6 max-w-2xl"
         >

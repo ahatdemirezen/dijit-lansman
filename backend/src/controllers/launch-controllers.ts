@@ -63,7 +63,6 @@ export const getLaunchByLaunchUrl: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
-
 export const createAddLaunch: RequestHandler = async (req, res, next) => {
   const {
     launchName,
@@ -79,6 +78,15 @@ export const createAddLaunch: RequestHandler = async (req, res, next) => {
   } = req.body;
 
   try {
+    // Eğer yeni lansmanın `showOnHomepage` değeri true ise, diğer tüm lansmanların `showOnHomepage` alanını false yapalım
+    if (showOnHomepage) {
+      await addLaunchModel.updateMany(
+        {}, // Tüm lansmanları günceller
+        { $set: { showOnHomepage: false } }
+      );
+    }
+
+    // Yeni lansman oluşturuluyor
     const newAddLaunch = await addLaunchModel.create({
       launchName,
       language,
@@ -98,24 +106,28 @@ export const createAddLaunch: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const updateAddLaunch: RequestHandler<
-  UpdateLaunchParams,
-  unknown,
-  UpdateAddLaunchBody,
-  unknown
-> = async (req, res, next) => {
+
+export const updateAddLaunch: RequestHandler<UpdateLaunchParams, unknown, UpdateAddLaunchBody, unknown> = async (req, res, next) => {
   const { launchId } = req.params;
-  const updateData = req.body;
+  const { showOnHomepage, ...updateData } = req.body;
 
   try {
     if (!mongoose.isValidObjectId(launchId)) {
       throw createHttpError(400, "Invalid launchId");
     }
 
-    // Tarihleri string olarak kaydedin
+    if (showOnHomepage) {
+      // Eğer `showOnHomepage` true ise, diğer tüm lansmanları false yap
+      await addLaunchModel.updateMany(
+        { _id: { $ne: launchId } }, // Bu lansman hariç diğerleri
+        { $set: { showOnHomepage: false } }
+      );
+    }
+
+    // Güncellenen lansman verisini kaydet
     const updatedAddLaunch = await addLaunchModel.findByIdAndUpdate(
       launchId,
-      { $set: updateData }, // Date objesi yerine direkt string olarak kaydediyoruz
+      { $set: { ...updateData, showOnHomepage } },
       { new: true, runValidators: true }
     );
 
@@ -128,6 +140,7 @@ export const updateAddLaunch: RequestHandler<
     next(error);
   }
 };
+
 
 export const deleteAddLaunch: RequestHandler = async (req, res, next) => {
   const { launchId } = req.params;
