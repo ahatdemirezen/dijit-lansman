@@ -132,8 +132,9 @@ const PreviewPage: React.FC = () => {
 
   return (
     <div className="relative overflow-x-hidden">
+      {" "}
+      {/* overflow-x-hidden ile yatay scroll gizlendi */}
       <NavBar />
-
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 max-w-full bg-white">
         {components.map((component: any) => {
           if (!component.content) return null;
