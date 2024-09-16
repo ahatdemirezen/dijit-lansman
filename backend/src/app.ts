@@ -43,7 +43,7 @@ app.use("/api/media", media);
 app.use("/api/seoSettings", seoSettings);
 app.use("/api/deployDesign", deployDesign);
 app.use("/api/login", loginRoute);
-app.use('/api', hompageroute); 
+app.use("/api/homepage", hompageroute);
 
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
