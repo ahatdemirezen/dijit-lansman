@@ -351,7 +351,7 @@ const FullScreenCardSliderForm: React.FC<FullScreenCardSliderFormProps> = ({
             <div className="mb-4">
               <input
                 type="text"
-                placeholder="Lansman Adına Göre Ara"
+                placeholder="Medya adı veya lansman adına göre arama"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700"

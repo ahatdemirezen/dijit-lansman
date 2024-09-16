@@ -237,7 +237,7 @@ const TwinCardForm: React.FC<TwinCardFormProps> = ({
             <h3 className="text-lg font-semibold mb-4">Sağ Medya Seç</h3>
             <input
               type="text"
-              placeholder="Medya adına veya lansman adına göre arama"
+              placeholder="Medya adı veya lansman adına göre arama"
               value={rightSearchTerm}
               onChange={(e) => setRightSearchTerm(e.target.value)}
               className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700 mb-4"
@@ -288,7 +288,7 @@ const TwinCardForm: React.FC<TwinCardFormProps> = ({
             <h3 className="text-lg font-semibold mb-4">Sol Medya Seç</h3>
             <input
               type="text"
-              placeholder="Medya adına veya lansman adına göre arama"
+              placeholder="Medya adı veya lansman adına göre arama"
               value={leftSearchTerm}
               onChange={(e) => setLeftSearchTerm(e.target.value)}
               className="border border-gray-500 rounded-md px-2 py-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-gray-500 text-sm font-medium text-gray-700 mb-4"
