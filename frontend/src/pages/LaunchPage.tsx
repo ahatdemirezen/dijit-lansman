@@ -24,12 +24,15 @@ import ReelsBottomCardSection from "../sections/ReelsBottomCardSection";
 import BottomTextCardSection from "../sections/BottomTextCardSection";
 import BannerSection from "../sections/BannerSection";
 import NavBar from "../sections/NavBar";
+import PopupComponent from "./visitorsForPopUp";
 
 const LaunchPage: React.FC<any> = (components: any) => {
   console.log("components", components);
 
   return (
     <div className="relative overflow-x-hidden">
+      <PopupComponent />{" "}
+      {/* Sayfa yüklendiğinde pop-up otomatik olarak açılacak */}
       <NavBar />
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 max-w-full bg-white">
         {components.components.map((component: any) => {
